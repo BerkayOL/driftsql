@@ -76,4 +76,25 @@ class PhotoCubit extends Cubit<PhotoState> {
       emit(PhotoError('Fotoğraf kaydedilirken bir hata oluştu: $e'));
     }
   }
+
+  // 3. FOTOĞRAFI VERİ TABANINDAN SİLME FONKSİYONU
+  Future<void> deletePhoto(OfflinePhotosTableData photo) async {
+    try {
+      // 1. Önce fiziksel dosyayı cihazın kalıcı hafızasından siliyoruz.
+      final file = File(photo.imagePath);
+      if (await file.exists()) {
+        await file.delete();
+      }
+      // 2. Sonra veri tabanından bu fotoğraf kaydını siliyoruz.
+      await (_database.delete(
+        _database.offlinePhotosTable,
+      )..where((tbl) => tbl.id.equals(photo.id))).go();
+
+      // 3. İşlem bittikten sonra listeyi güncelle
+      await loadPhotos();
+    } catch (e) {
+      // Hata oluşursa PhotoError durumuna geçiyoruz ve hata mesajını veriyoruz.
+      emit(PhotoError('Fotoğraf silinirken bir hata oluştu: $e'));
+    }
+  }
 }

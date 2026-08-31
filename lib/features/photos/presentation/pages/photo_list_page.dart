@@ -61,6 +61,10 @@ class _PhotoListPageState extends State<PhotoListPage> {
               itemBuilder: (context, index) {
                 final photo = state.photos[index];
 
+                // Tarihi GG/AA/YYYY formatına çeviriyoruz.
+                final formattedDate =
+                    "${photo.createdAt.day.toString().padLeft(2, '0')}.${photo.createdAt.month.toString().padLeft(2, '0')}.${photo.createdAt.year}";
+
                 return GestureDetector(
                   onTap: () {
                     // Fotoğrafa tıklandığında ekranın tamamını kaplayan bir Dialog açılır
@@ -99,9 +103,63 @@ class _PhotoListPageState extends State<PhotoListPage> {
                       ),
                     );
                   },
+                  onLongPress: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Fotoğrafı Sil'),
+                        content: const Text(
+                          'Bu fotoğrafı silmek istediğinize emin misiniz?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('İptal'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context); // Diyalogu kapat
+                              // Cubit'teki silme fonksiyonunu tetikle
+                              context.read<PhotoCubit>().deletePhoto(photo);
+                            },
+                            child: const Text(
+                              'Sil',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  // FOTOĞRAF ve TARİH GÖRÜNÜMÜ
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.file(File(photo.imagePath), fit: BoxFit.cover),
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // Arka planda fotoğraf
+                        Image.file(File(photo.imagePath), fit: BoxFit.cover),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            color:
+                                Colors.black54, // yarı saydam siyah arka plan
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Text(
+                              formattedDate,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
