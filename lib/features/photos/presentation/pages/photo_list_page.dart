@@ -61,10 +61,48 @@ class _PhotoListPageState extends State<PhotoListPage> {
               itemBuilder: (context, index) {
                 final photo = state.photos[index];
 
-                return ClipRRect(
-                  // File ile fotoğrafın yolunu veriyoruz ve ekranda gösteriyoruz.
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.file(File(photo.imagePath), fit: BoxFit.cover),
+                return GestureDetector(
+                  onTap: () {
+                    // Fotoğrafa tıklandığında ekranın tamamını kaplayan bir Dialog açılır
+                    showDialog(
+                      context: context,
+                      builder: (context) => Dialog(
+                        backgroundColor: Colors.black87,
+                        insetPadding: EdgeInsets
+                            .zero, // Kenar boşluklarını sıfırla (Tam Ekran)
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // InteractiveViewer: Fotoğrafa iki parmakla zoom yapılmasını sağlar!
+                            InteractiveViewer(
+                              child: Image.file(
+                                File(photo.imagePath),
+                                fit: BoxFit
+                                    .contain, // Ekrana sığacak şekilde ortala
+                              ),
+                            ),
+                            // Sağ üste bir kapatma butonu ekleyelim
+                            Positioned(
+                              top: 40,
+                              right: 20,
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 32,
+                                ),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(File(photo.imagePath), fit: BoxFit.cover),
+                  ),
                 );
               },
             );
