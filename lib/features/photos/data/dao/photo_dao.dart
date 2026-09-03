@@ -26,6 +26,17 @@ class PhotoDao extends DatabaseAccessor<AppDatabase> with _$PhotoDaoMixin {
     return select(offlinePhotosTable).get();
   }
 
+  /// Fotoğraf tablosunu sürekli izler.
+  ///
+  /// .watch() bize Stream döndürür.
+  /// Tablo değiştiğinde Drift sorguyu tekrar çalıştırır
+  /// ve güncel listeyi Stream üzerinden yayınlar.
+  
+  Stream<List<OfflinePhotosTableData>> watchAllPhotos() {
+    final query = select(offlinePhotosTable)..orderBy([(t) => OrderingTerm.desc(t.createdAt)]);
+    return query.watch();
+  }
+  
   /// Yeni bir fotoğraf kaydı ekler.
   ///
   /// Fotoğrafın kendisini değil,

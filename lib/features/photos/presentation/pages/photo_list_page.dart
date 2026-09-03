@@ -18,7 +18,7 @@ class _PhotoListPageState extends State<PhotoListPage> {
   void initState() {
     super.initState();
     // Ekran açıldığında fotoğrafları yükle
-    context.read<PhotoCubit>().loadPhotos();
+    context.read<PhotoCubit>().watchPhotos();
   }
 
   @override
