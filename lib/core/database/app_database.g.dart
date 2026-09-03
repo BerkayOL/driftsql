@@ -645,12 +645,400 @@ class BuildingsTableCompanion extends UpdateCompanion<BuildingsTableData> {
   }
 }
 
+class $FloorsTableTable extends FloorsTable
+    with TableInfo<$FloorsTableTable, FloorsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $FloorsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _buildingIdMeta = const VerificationMeta(
+    'buildingId',
+  );
+  @override
+  late final GeneratedColumn<int> buildingId = GeneratedColumn<int>(
+    'building_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES buildings_table (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _floorNumberMeta = const VerificationMeta(
+    'floorNumber',
+  );
+  @override
+  late final GeneratedColumn<int> floorNumber = GeneratedColumn<int>(
+    'floor_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    buildingId,
+    name,
+    floorNumber,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'floors_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<FloorsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('building_id')) {
+      context.handle(
+        _buildingIdMeta,
+        buildingId.isAcceptableOrUnknown(data['building_id']!, _buildingIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_buildingIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('floor_number')) {
+      context.handle(
+        _floorNumberMeta,
+        floorNumber.isAcceptableOrUnknown(
+          data['floor_number']!,
+          _floorNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_floorNumberMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  FloorsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return FloorsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      buildingId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}building_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      floorNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}floor_number'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $FloorsTableTable createAlias(String alias) {
+    return $FloorsTableTable(attachedDatabase, alias);
+  }
+}
+
+class FloorsTableData extends DataClass implements Insertable<FloorsTableData> {
+  /// Her katın benzersiz ID'si.
+  final int id;
+
+  /// Bu katın hangi binaya ait olduğunu belirtir.
+  ///
+  /// Foreign Key:
+  ///
+  /// floors_table.building_id
+  ///             ↓
+  /// buildings_table.id
+  ///
+  /// Böylece kat ile bina arasında gerçek bir
+  /// database ilişkisi kurmuş oluyoruz.
+  final int buildingId;
+
+  /// Katın adı.
+  ///
+  /// Örnek:
+  /// Basement
+  /// Ground Floor
+  /// First Floor
+  final String name;
+
+  /// Kat numarası.
+  ///
+  /// Örneğin:
+  /// Bodrum = -1
+  /// Zemin = 0
+  /// 1. Kat = 1
+  /// 2. Kat = 2
+  final int floorNumber;
+
+  /// Kaydın oluşturulma zamanı.
+  final DateTime createdAt;
+  const FloorsTableData({
+    required this.id,
+    required this.buildingId,
+    required this.name,
+    required this.floorNumber,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['building_id'] = Variable<int>(buildingId);
+    map['name'] = Variable<String>(name);
+    map['floor_number'] = Variable<int>(floorNumber);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  FloorsTableCompanion toCompanion(bool nullToAbsent) {
+    return FloorsTableCompanion(
+      id: Value(id),
+      buildingId: Value(buildingId),
+      name: Value(name),
+      floorNumber: Value(floorNumber),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FloorsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return FloorsTableData(
+      id: serializer.fromJson<int>(json['id']),
+      buildingId: serializer.fromJson<int>(json['buildingId']),
+      name: serializer.fromJson<String>(json['name']),
+      floorNumber: serializer.fromJson<int>(json['floorNumber']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'buildingId': serializer.toJson<int>(buildingId),
+      'name': serializer.toJson<String>(name),
+      'floorNumber': serializer.toJson<int>(floorNumber),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  FloorsTableData copyWith({
+    int? id,
+    int? buildingId,
+    String? name,
+    int? floorNumber,
+    DateTime? createdAt,
+  }) => FloorsTableData(
+    id: id ?? this.id,
+    buildingId: buildingId ?? this.buildingId,
+    name: name ?? this.name,
+    floorNumber: floorNumber ?? this.floorNumber,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  FloorsTableData copyWithCompanion(FloorsTableCompanion data) {
+    return FloorsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      buildingId: data.buildingId.present
+          ? data.buildingId.value
+          : this.buildingId,
+      name: data.name.present ? data.name.value : this.name,
+      floorNumber: data.floorNumber.present
+          ? data.floorNumber.value
+          : this.floorNumber,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FloorsTableData(')
+          ..write('id: $id, ')
+          ..write('buildingId: $buildingId, ')
+          ..write('name: $name, ')
+          ..write('floorNumber: $floorNumber, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, buildingId, name, floorNumber, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FloorsTableData &&
+          other.id == this.id &&
+          other.buildingId == this.buildingId &&
+          other.name == this.name &&
+          other.floorNumber == this.floorNumber &&
+          other.createdAt == this.createdAt);
+}
+
+class FloorsTableCompanion extends UpdateCompanion<FloorsTableData> {
+  final Value<int> id;
+  final Value<int> buildingId;
+  final Value<String> name;
+  final Value<int> floorNumber;
+  final Value<DateTime> createdAt;
+  const FloorsTableCompanion({
+    this.id = const Value.absent(),
+    this.buildingId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.floorNumber = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  FloorsTableCompanion.insert({
+    this.id = const Value.absent(),
+    required int buildingId,
+    required String name,
+    required int floorNumber,
+    this.createdAt = const Value.absent(),
+  }) : buildingId = Value(buildingId),
+       name = Value(name),
+       floorNumber = Value(floorNumber);
+  static Insertable<FloorsTableData> custom({
+    Expression<int>? id,
+    Expression<int>? buildingId,
+    Expression<String>? name,
+    Expression<int>? floorNumber,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (buildingId != null) 'building_id': buildingId,
+      if (name != null) 'name': name,
+      if (floorNumber != null) 'floor_number': floorNumber,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  FloorsTableCompanion copyWith({
+    Value<int>? id,
+    Value<int>? buildingId,
+    Value<String>? name,
+    Value<int>? floorNumber,
+    Value<DateTime>? createdAt,
+  }) {
+    return FloorsTableCompanion(
+      id: id ?? this.id,
+      buildingId: buildingId ?? this.buildingId,
+      name: name ?? this.name,
+      floorNumber: floorNumber ?? this.floorNumber,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (buildingId.present) {
+      map['building_id'] = Variable<int>(buildingId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (floorNumber.present) {
+      map['floor_number'] = Variable<int>(floorNumber.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FloorsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('buildingId: $buildingId, ')
+          ..write('name: $name, ')
+          ..write('floorNumber: $floorNumber, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $OfflinePhotosTableTable offlinePhotosTable =
       $OfflinePhotosTableTable(this);
   late final $BuildingsTableTable buildingsTable = $BuildingsTableTable(this);
+  late final $FloorsTableTable floorsTable = $FloorsTableTable(this);
   late final PhotoDao photoDao = PhotoDao(this as AppDatabase);
   late final BuildingDao buildingDao = BuildingDao(this as AppDatabase);
   @override
@@ -660,7 +1048,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     offlinePhotosTable,
     buildingsTable,
+    floorsTable,
   ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'buildings_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('floors_table', kind: UpdateKind.delete)],
+    ),
+  ]);
 }
 
 typedef $$OfflinePhotosTableTableCreateCompanionBuilder =
@@ -849,6 +1248,38 @@ typedef $$BuildingsTableTableUpdateCompanionBuilder =
       Value<DateTime> createdAt,
     });
 
+final class $$BuildingsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $BuildingsTableTable,
+          BuildingsTableData
+        > {
+  $$BuildingsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<$FloorsTableTable, List<FloorsTableData>>
+  _floorsTableRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.floorsTable,
+    aliasName: 'buildings_table__id__floors_table__building_id',
+  );
+
+  $$FloorsTableTableProcessedTableManager get floorsTableRefs {
+    final manager = $$FloorsTableTableTableManager(
+      $_db,
+      $_db.floorsTable,
+    ).filter((f) => f.buildingId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_floorsTableRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
 class $$BuildingsTableTableFilterComposer
     extends Composer<_$AppDatabase, $BuildingsTableTable> {
   $$BuildingsTableTableFilterComposer({
@@ -882,6 +1313,31 @@ class $$BuildingsTableTableFilterComposer
     column: $table.createdAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> floorsTableRefs(
+    Expression<bool> Function($$FloorsTableTableFilterComposer f) f,
+  ) {
+    final $$FloorsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.floorsTable,
+      getReferencedColumn: (t) => t.buildingId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FloorsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.floorsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$BuildingsTableTableOrderingComposer
@@ -946,6 +1402,31 @@ class $$BuildingsTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  Expression<T> floorsTableRefs<T extends Object>(
+    Expression<T> Function($$FloorsTableTableAnnotationComposer a) f,
+  ) {
+    final $$FloorsTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.floorsTable,
+      getReferencedColumn: (t) => t.buildingId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$FloorsTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.floorsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$BuildingsTableTableTableManager
@@ -959,16 +1440,9 @@ class $$BuildingsTableTableTableManager
           $$BuildingsTableTableAnnotationComposer,
           $$BuildingsTableTableCreateCompanionBuilder,
           $$BuildingsTableTableUpdateCompanionBuilder,
-          (
-            BuildingsTableData,
-            BaseReferences<
-              _$AppDatabase,
-              $BuildingsTableTable,
-              BuildingsTableData
-            >,
-          ),
+          (BuildingsTableData, $$BuildingsTableTableReferences),
           BuildingsTableData,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool floorsTableRefs})
         > {
   $$BuildingsTableTableTableManager(
     _$AppDatabase db,
@@ -1012,9 +1486,43 @@ class $$BuildingsTableTableTableManager
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$BuildingsTableTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({floorsTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (floorsTableRefs) db.floorsTable],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (floorsTableRefs)
+                    await $_getPrefetchedData<
+                      BuildingsTableData,
+                      $BuildingsTableTable,
+                      FloorsTableData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$BuildingsTableTableReferences
+                          ._floorsTableRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$BuildingsTableTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).floorsTableRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.buildingId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -1029,12 +1537,323 @@ typedef $$BuildingsTableTableProcessedTableManager =
       $$BuildingsTableTableAnnotationComposer,
       $$BuildingsTableTableCreateCompanionBuilder,
       $$BuildingsTableTableUpdateCompanionBuilder,
-      (
-        BuildingsTableData,
-        BaseReferences<_$AppDatabase, $BuildingsTableTable, BuildingsTableData>,
-      ),
+      (BuildingsTableData, $$BuildingsTableTableReferences),
       BuildingsTableData,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool floorsTableRefs})
+    >;
+typedef $$FloorsTableTableCreateCompanionBuilder =
+    FloorsTableCompanion Function({
+      Value<int> id,
+      required int buildingId,
+      required String name,
+      required int floorNumber,
+      Value<DateTime> createdAt,
+    });
+typedef $$FloorsTableTableUpdateCompanionBuilder =
+    FloorsTableCompanion Function({
+      Value<int> id,
+      Value<int> buildingId,
+      Value<String> name,
+      Value<int> floorNumber,
+      Value<DateTime> createdAt,
+    });
+
+final class $$FloorsTableTableReferences
+    extends BaseReferences<_$AppDatabase, $FloorsTableTable, FloorsTableData> {
+  $$FloorsTableTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $BuildingsTableTable _buildingIdTable(_$AppDatabase db) => db
+      .buildingsTable
+      .createAlias('floors_table__building_id__buildings_table__id');
+
+  $$BuildingsTableTableProcessedTableManager get buildingId {
+    final $_column = $_itemColumn<int>('building_id')!;
+
+    final manager = $$BuildingsTableTableTableManager(
+      $_db,
+      $_db.buildingsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_buildingIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$FloorsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $FloorsTableTable> {
+  $$FloorsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get floorNumber => $composableBuilder(
+    column: $table.floorNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$BuildingsTableTableFilterComposer get buildingId {
+    final $$BuildingsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.buildingId,
+      referencedTable: $db.buildingsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BuildingsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.buildingsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FloorsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $FloorsTableTable> {
+  $$FloorsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get floorNumber => $composableBuilder(
+    column: $table.floorNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$BuildingsTableTableOrderingComposer get buildingId {
+    final $$BuildingsTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.buildingId,
+      referencedTable: $db.buildingsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BuildingsTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.buildingsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FloorsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $FloorsTableTable> {
+  $$FloorsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get floorNumber => $composableBuilder(
+    column: $table.floorNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$BuildingsTableTableAnnotationComposer get buildingId {
+    final $$BuildingsTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.buildingId,
+      referencedTable: $db.buildingsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$BuildingsTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.buildingsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$FloorsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $FloorsTableTable,
+          FloorsTableData,
+          $$FloorsTableTableFilterComposer,
+          $$FloorsTableTableOrderingComposer,
+          $$FloorsTableTableAnnotationComposer,
+          $$FloorsTableTableCreateCompanionBuilder,
+          $$FloorsTableTableUpdateCompanionBuilder,
+          (FloorsTableData, $$FloorsTableTableReferences),
+          FloorsTableData,
+          PrefetchHooks Function({bool buildingId})
+        > {
+  $$FloorsTableTableTableManager(_$AppDatabase db, $FloorsTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$FloorsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$FloorsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$FloorsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> buildingId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> floorNumber = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => FloorsTableCompanion(
+                id: id,
+                buildingId: buildingId,
+                name: name,
+                floorNumber: floorNumber,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int buildingId,
+                required String name,
+                required int floorNumber,
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => FloorsTableCompanion.insert(
+                id: id,
+                buildingId: buildingId,
+                name: name,
+                floorNumber: floorNumber,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$FloorsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({buildingId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (buildingId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.buildingId,
+                                referencedTable: $$FloorsTableTableReferences
+                                    ._buildingIdTable(db),
+                                referencedColumn: $$FloorsTableTableReferences
+                                    ._buildingIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$FloorsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $FloorsTableTable,
+      FloorsTableData,
+      $$FloorsTableTableFilterComposer,
+      $$FloorsTableTableOrderingComposer,
+      $$FloorsTableTableAnnotationComposer,
+      $$FloorsTableTableCreateCompanionBuilder,
+      $$FloorsTableTableUpdateCompanionBuilder,
+      (FloorsTableData, $$FloorsTableTableReferences),
+      FloorsTableData,
+      PrefetchHooks Function({bool buildingId})
     >;
 
 class $AppDatabaseManager {
@@ -1044,4 +1863,6 @@ class $AppDatabaseManager {
       $$OfflinePhotosTableTableTableManager(_db, _db.offlinePhotosTable);
   $$BuildingsTableTableTableManager get buildingsTable =>
       $$BuildingsTableTableTableManager(_db, _db.buildingsTable);
+  $$FloorsTableTableTableManager get floorsTable =>
+      $$FloorsTableTableTableManager(_db, _db.floorsTable);
 }
