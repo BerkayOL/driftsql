@@ -3,17 +3,11 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:driftsql/features/photos/data/dao/photo_dao.dart';
 
 import '../../features/photos/data/offline_photos_table.dart';
+import '../../features/buildings/data/buildings_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(
-  tables: [
-    OfflinePhotosTable,
-  ],
-  daos: [
-    PhotoDao,
-  ],
-)
+@DriftDatabase(tables: [OfflinePhotosTable, BuildingsTable], daos: [PhotoDao])
 final class AppDatabase extends _$AppDatabase {
   /// Normal uygulama çalışırken kullanılacak constructor.
   ///
@@ -22,12 +16,7 @@ final class AppDatabase extends _$AppDatabase {
   /// - Native platformlarda database dosyasını uygulamanın
   ///   kalıcı klasöründe saklar.
   /// - Veritabanı dosyamız: app_database.sqlite
-  AppDatabase.defaults()
-      : super(
-          driftDatabase(
-            name: 'app_database',
-          ),
-        );
+  AppDatabase.defaults() : super(driftDatabase(name: 'app_database'));
 
   /// Testlerde farklı bir database bağlantısı verebilmemizi sağlar.
   ///
@@ -40,5 +29,33 @@ final class AppDatabase extends _$AppDatabase {
   /// Sadece database şemasının versiyonudur.
   /// Tablo/kolon yapısı değiştiğinde migration ile birlikte artırılır.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  /// Database şeması değiştiğinde eski kullanıcıların
+  /// verilerini silmeden yeni şemaya geçmemizi sağlar.
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      /// Uygulama ilk kez kuruluyorsa database henüz yoktur.
+      ///
+      /// Bu durumda Drift mevcut bütün tabloları sıfırdan oluşturur.
+      onCreate: (m) async {
+        await m.createAll();
+      },
+
+      /// Cihazda daha eski bir database varsa çalışır.
+      ///
+      /// Örneğin:
+      /// Version 1 -> Version 2
+      onUpgrade: (Migrator m, int from, int to) async {
+        /// Version 2'de BuildingsTable eklendi.
+        ///
+        /// Eğer kullanıcının database'i version 1 ise
+        /// sadece yeni tabloyu oluşturuyoruz.
+        if (from < 2) {
+          await m.createTable(buildingsTable);
+        }
+      },
+    );
+  }
 }
