@@ -1,23 +1,23 @@
 import 'dart:io';
+import 'package:driftsql/features/photos/data/dao/photo_dao.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-// Drift'in Value sınıfını kullanabilmek için import ediyoruz.
-import 'package:drift/drift.dart' as drift;
 
 import '../../../../core/database/app_database.dart';
 import 'photo_state.dart';
 
 class PhotoCubit extends Cubit<PhotoState> {
-  // Cubit'in veri tabanına erişebilmesi için AppDatabase sınıfını alıyoruz.
-  final AppDatabase _database;
-
+  /// Cubit artık doğrudan AppDatabase ile çalışmıyor.
+  ///
+  /// Database sorgularını PhotoDao yönetiyor.
+  final PhotoDao _photoDao;
   // Kamerayı veya galeriyi açmak için kullanacağımız paket.
   final ImagePicker _picker = ImagePicker();
 
   // Constructor: Cubit ilk oluştuğunda AppDatabase'i alır ve ekranı PhotoInitial(Başlangıç) durumuna çeker.
-  PhotoCubit(this._database) : super(PhotoInitial());
+  PhotoCubit(this._photoDao) : super(PhotoInitial());
 
   // 1. FOTOĞRAFLARI VERİ TABANINDAN OKUMA FONKSİYONU
   Future<void> loadPhotos() async {
@@ -25,7 +25,7 @@ class PhotoCubit extends Cubit<PhotoState> {
     emit(PhotoLoading());
     try {
       // Drift ile tablodaki tüm verileri çekiyoruz (SELECT * FROM OfflinePhotosTable)
-      final photos = await _database.select(_database.offlinePhotosTable).get();
+      final photos = await _photoDao.getAllPhotos();
 
       // Veriler başarıyla geldiyse, arayüze "Al bu fotoğrafları ekranda listele" diyoruz.
       emit(PhotoLoaded(photos));
@@ -60,15 +60,10 @@ class PhotoCubit extends Cubit<PhotoState> {
       // Adım 3: Önbellekteki (Geçiçi) fotoğrafı, bu yeni kalıcı adrese kopyala
       await File(pickedFile.path).copy(savedImage.path);
 
-      // Adım 4: Veri tabanına bu YENİ YOLU (path) metin olarak kaydet (INSERT)
-      await _database
-          .into(_database.offlinePhotosTable)
-          .insert(
-            OfflinePhotosTableCompanion(
-              // ID ve createdAt otomatik oluşacağı için sadece imagePath'i veriyoruz.
-              imagePath: drift.Value(savedImage.path),
-            ),
-          );
+      // Cubit artık INSERT sorgusu yazmıyor.
+      //
+      // Sadece DAO'ya kaydedilecek bilgiyi gönderiyor.
+      await _photoDao.insertPhoto(imagePath: savedImage.path);
 
       await loadPhotos(); // Fotoğraf eklendikten sonra tekrar fotoğrafları yükle ve ekrana yansıt.
     } catch (e) {
@@ -85,11 +80,8 @@ class PhotoCubit extends Cubit<PhotoState> {
       if (await file.exists()) {
         await file.delete();
       }
-      // 2. Sonra veri tabanından bu fotoğraf kaydını siliyoruz.
-      await (_database.delete(
-        _database.offlinePhotosTable,
-      )..where((tbl) => tbl.id.equals(photo.id))).go();
-
+      // Database kaydını silme işlemi DAO'ya ait.
+      await _photoDao.deletePhotoById(photo.id);
       // 3. İşlem bittikten sonra listeyi güncelle
       await loadPhotos();
     } catch (e) {

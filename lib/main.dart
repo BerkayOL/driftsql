@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => PhotoCubit(database),
+      create: (context) => PhotoCubit(database.photoDao),
       child: MaterialApp(
         title: 'LiDAR Offline Photo App',
         // Debug modunda sağ üst köşede çıkan "Debug" yazısını kaldırıyoruz.

@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:driftsql/features/photos/data/dao/photo_dao.dart';
 
 import '../../features/photos/data/offline_photos_table.dart';
 
@@ -8,6 +9,9 @@ part 'app_database.g.dart';
 @DriftDatabase(
   tables: [
     OfflinePhotosTable,
+  ],
+  daos: [
+    PhotoDao,
   ],
 )
 final class AppDatabase extends _$AppDatabase {
