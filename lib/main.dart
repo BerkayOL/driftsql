@@ -10,7 +10,7 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Drift veri tabanını başlatıyoruz.
-  final appDatabase = AppDatabase();
+  final appDatabase = AppDatabase.defaults();
 
   // Veri tabanını içeriye yolluyoruz ve uygulamayı başlatıyoruz.
   runApp(MyApp(database: appDatabase));

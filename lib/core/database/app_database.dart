@@ -1,33 +1,40 @@
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
+import 'package:drift_flutter/drift_flutter.dart';
 
 import '../../features/photos/data/offline_photos_table.dart';
 
-// Drift'in üreteceği (generate) dosyanın adını belirttik.
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [OfflinePhotosTable])
-class AppDatabase extends _$AppDatabase {
-  // Veritabanı dosyasının adını belirledik.
-  AppDatabase() : super(_openConnection());
+@DriftDatabase(
+  tables: [
+    OfflinePhotosTable,
+  ],
+)
+final class AppDatabase extends _$AppDatabase {
+  /// Normal uygulama çalışırken kullanılacak constructor.
+  ///
+  /// driftDatabase:
+  /// - Platforma uygun SQLite bağlantısını oluşturur.
+  /// - Native platformlarda database dosyasını uygulamanın
+  ///   kalıcı klasöründe saklar.
+  /// - Veritabanı dosyamız: app_database.sqlite
+  AppDatabase.defaults()
+      : super(
+          driftDatabase(
+            name: 'app_database',
+          ),
+        );
 
+  /// Testlerde farklı bir database bağlantısı verebilmemizi sağlar.
+  ///
+  /// Örneğin ileride gerçek dosya oluşturmadan memory database
+  /// kullanarak unit test yazabiliriz.
+  AppDatabase(super.e);
+
+  /// Bu değer uygulama versiyonu değildir.
+  ///
+  /// Sadece database şemasının versiyonudur.
+  /// Tablo/kolon yapısı değiştiğinde migration ile birlikte artırılır.
   @override
   int get schemaVersion => 1;
-}
-
-LazyDatabase _openConnection() {
-  // Veritabanı dosyasının cihazda saklanacağı dizini belirliyoruz.
-  return LazyDatabase(() async {
-    // Cihazın 'uygulamaya özel kalıcı klasörünü' buluyoruz.
-    final dbFolder = await getApplicationDocumentsDirectory();
-
-    // Veri tabanı dosyamızın adı ''app_database.sqlite'' olacak ve o klasörün içerisinde saklanacak.
-    final file = File(p.join(dbFolder.path, 'app_database.sqlite'));
-
-    // Bağlantıyı başlatma.
-    return NativeDatabase.createInBackground(file);
-  });
 }
