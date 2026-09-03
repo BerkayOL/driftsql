@@ -652,6 +652,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $OfflinePhotosTableTable(this);
   late final $BuildingsTableTable buildingsTable = $BuildingsTableTable(this);
   late final PhotoDao photoDao = PhotoDao(this as AppDatabase);
+  late final BuildingDao buildingDao = BuildingDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();

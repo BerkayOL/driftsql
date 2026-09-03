@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:driftsql/features/buildings/data/dao/building_dao.dart';
 import 'package:driftsql/features/photos/data/dao/photo_dao.dart';
 
 import '../../features/photos/data/offline_photos_table.dart';
@@ -7,7 +8,10 @@ import '../../features/buildings/data/buildings_table.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [OfflinePhotosTable, BuildingsTable], daos: [PhotoDao])
+@DriftDatabase(
+  tables: [OfflinePhotosTable, BuildingsTable],
+  daos: [PhotoDao, BuildingDao],
+)
 final class AppDatabase extends _$AppDatabase {
   /// Normal uygulama çalışırken kullanılacak constructor.
   ///

@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/database/app_database.dart';
+
+import 'features/buildings/presentation/cubit/building_cubit.dart';
+import 'features/home/presentation/pages/home_page.dart';
 import 'features/photos/presentation/cubit/photo_cubit.dart';
-import 'features/photos/presentation/pages/photo_list_page.dart';
 
 void main() {
-  // 1. Flutter'ın servislerle iletişim kurabilmesi için gerekli olan kodu çalıştırıyoruz.
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Drift veri tabanını başlatıyoruz.
+  /// Uygulamanın local SQLite database'ini oluşturuyoruz.
   final appDatabase = AppDatabase.defaults();
 
-  // Veri tabanını içeriye yolluyoruz ve uygulamayı başlatıyoruz.
   runApp(MyApp(database: appDatabase));
 }
 
@@ -23,20 +23,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => PhotoCubit(database.photoDao),
+    /// Uygulamada artık birden fazla Cubit olduğu için
+    /// MultiBlocProvider kullanıyoruz.
+    ///
+    /// Böylece provider'ları iç içe yazmamıza gerek kalmıyor.
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => BuildingCubit(database.buildingDao)),
+        BlocProvider(create: (_) => PhotoCubit(database.photoDao)),
+      ],
       child: MaterialApp(
-        title: 'LiDAR Offline Photo App',
-        // Debug modunda sağ üst köşede çıkan "Debug" yazısını kaldırıyoruz.
+        title: 'ThermoPlanX Drift Test',
         debugShowCheckedModeBanner: false,
-
-        // Material 3 Tasarımını kullanıyoruz.
         theme: ThemeData(
           useMaterial3: true,
           colorSchemeSeed: Colors.deepPurple,
         ),
-        // Uygulama açıldığında ilk olarak PhotoListPage sayfasını gösteriyoruz.
-        home: const PhotoListPage(),
+        home: const HomePage(),
       ),
     );
   }
