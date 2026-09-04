@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/database/app_database.dart';
 
 import 'features/buildings/presentation/cubit/building_cubit.dart';
+import 'features/floors/presentation/cubit/floor_cubit.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/photos/presentation/cubit/photo_cubit.dart';
 
@@ -30,6 +31,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => BuildingCubit(database.buildingDao)),
+        BlocProvider(create: (_) => FloorCubit(database.floorDao)),
         BlocProvider(create: (_) => PhotoCubit(database.photoDao)),
       ],
       child: MaterialApp(

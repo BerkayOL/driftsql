@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../floors/presentation/pages/floor_list_page.dart';
 import '../cubit/building_cubit.dart';
 import '../cubit/building_state.dart';
 
@@ -87,6 +88,17 @@ class _BuildingListPageState extends State<BuildingListPage> {
 
                             return ListTile(
                               leading: const Icon(Icons.apartment),
+
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => FloorListPage(
+                                      buildingId: building.id,
+                                      buildingName: building.name,
+                                    ),
+                                  ),
+                                );
+                              },
 
                               title: Text(building.name),
 
