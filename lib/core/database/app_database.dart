@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+import 'package:driftsql/features/rooms/data/dao/room_dao.dart';
 
 import '../../features/buildings/data/buildings_table.dart';
 import '../../features/buildings/data/dao/building_dao.dart';
@@ -13,7 +14,7 @@ part 'app_database.g.dart';
 
 @DriftDatabase(
   tables: [OfflinePhotosTable, BuildingsTable, FloorsTable, RoomsTable],
-  daos: [PhotoDao, BuildingDao, FloorDao],
+  daos: [PhotoDao, BuildingDao, FloorDao, RoomDao],
 )
 final class AppDatabase extends _$AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'app_database'));
