@@ -28,20 +28,23 @@ class MyApp extends StatelessWidget {
     /// MultiBlocProvider kullanıyoruz.
     ///
     /// Böylece provider'ları iç içe yazmamıza gerek kalmıyor.
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => BuildingCubit(database.buildingDao)),
-        BlocProvider(create: (_) => FloorCubit(database.floorDao)),
-        BlocProvider(create: (_) => PhotoCubit(database.photoDao)),
-      ],
-      child: MaterialApp(
-        title: 'ThermoPlanX Drift Test',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: Colors.deepPurple,
+    return RepositoryProvider.value(
+      value: database,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => BuildingCubit(database.buildingDao)),
+          BlocProvider(create: (_) => FloorCubit(database.floorDao)),
+          BlocProvider(create: (_) => PhotoCubit(database.photoDao)),
+        ],
+        child: MaterialApp(
+          title: 'ThermoPlanX Drift Test',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorSchemeSeed: Colors.deepPurple,
+          ),
+          home: const HomePage(),
         ),
-        home: const HomePage(),
       ),
     );
   }

@@ -7,7 +7,10 @@ import '../cubit/photo_cubit.dart';
 import '../cubit/photo_state.dart';
 
 class PhotoListPage extends StatefulWidget {
-  const PhotoListPage({super.key});
+  final int? roomId;
+  final String? roomName;
+
+  const PhotoListPage({super.key, this.roomId, this.roomName});
 
   @override
   State<PhotoListPage> createState() => _PhotoListPageState();
@@ -18,13 +21,19 @@ class _PhotoListPageState extends State<PhotoListPage> {
   void initState() {
     super.initState();
     // Ekran açıldığında fotoğrafları yükle
-    context.read<PhotoCubit>().watchPhotos();
+    context.read<PhotoCubit>().watchPhotos(roomId: widget.roomId);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Fotoğraflar')),
+      appBar: AppBar(
+        title: Text(
+          widget.roomName == null
+              ? 'Fotoğraflar'
+              : '${widget.roomName} Fotoğrafları',
+        ),
+      ),
       // BlocConsumer, hem state'i dinler hem de UI'yi günceller.
       body: BlocConsumer<PhotoCubit, PhotoState>(
         listener: (context, state) {
@@ -59,7 +68,8 @@ class _PhotoListPageState extends State<PhotoListPage> {
               ),
               itemCount: state.photos.length,
               itemBuilder: (context, index) {
-                final photo = state.photos[index];
+                final result = state.photos[index];
+                final photo = result.photo;
 
                 // Tarihi GG/AA/YYYY formatına çeviriyoruz.
                 final formattedDate =
@@ -120,7 +130,7 @@ class _PhotoListPageState extends State<PhotoListPage> {
                             onPressed: () {
                               Navigator.pop(context); // Diyalogu kapat
                               // Cubit'teki silme fonksiyonunu tetikle
-                              context.read<PhotoCubit>().deletePhoto(photo);
+                              context.read<PhotoCubit>().deletePhoto(result);
                             },
                             child: const Text(
                               'Sil',
@@ -148,7 +158,10 @@ class _PhotoListPageState extends State<PhotoListPage> {
                                 Colors.black54, // yarı saydam siyah arka plan
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             child: Text(
-                              formattedDate,
+                              result.room == null
+                                  ? '$formattedDate • Atanmamış'
+                                  : '$formattedDate • ${result.building!.name} / '
+                                        '${result.floor!.name} / ${result.room!.name}',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                 color: Colors.white,
@@ -178,7 +191,10 @@ class _PhotoListPageState extends State<PhotoListPage> {
             heroTag: 'camera_btn',
             onPressed: () {
               // Cubit'teki fotoğraf çekme fonksiyonunu tetikliyoruz (Kamera modunda)
-              context.read<PhotoCubit>().pickAndSavePhoto(ImageSource.camera);
+              context.read<PhotoCubit>().pickAndSavePhoto(
+                ImageSource.camera,
+                roomId: widget.roomId,
+              );
             },
             child: const Icon(Icons.camera_alt),
           ),
@@ -187,7 +203,10 @@ class _PhotoListPageState extends State<PhotoListPage> {
             heroTag: 'gallery_btn',
             onPressed: () {
               // Cubit'teki fotoğraf çekme fonksiyonunu tetikliyoruz (Galeri modunda)
-              context.read<PhotoCubit>().pickAndSavePhoto(ImageSource.gallery);
+              context.read<PhotoCubit>().pickAndSavePhoto(
+                ImageSource.gallery,
+                roomId: widget.roomId,
+              );
             },
             tooltip: 'Galeri',
             child: const Icon(Icons.photo_library),

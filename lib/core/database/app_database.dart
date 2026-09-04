@@ -22,7 +22,7 @@ final class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -50,6 +50,11 @@ final class AppDatabase extends _$AppDatabase {
         /// RoomsTable, FloorsTable'a Foreign Key ile bağlıdır.
         if (from < 4) {
           await m.createTable(roomsTable);
+        }
+
+        /// Version 5: Mevcut fotoğrafları koruyan nullable Room foreign key'i.
+        if (from < 5) {
+          await m.addColumn(offlinePhotosTable, offlinePhotosTable.roomId);
         }
       },
 

@@ -1,6 +1,6 @@
 // app_database.dart dosyamızı import ediyoruz çünkü Drift'in bizim için ürettiği
 // "OfflinePhotosTableData" (fotoğraf nesnesi) sınıfını kullanacağız.
-import '../../../../core/database/app_database.dart';
+import '../../data/dao/photo_dao.dart';
 
 // Tüm durumların atası olan temel sınıf.
 // UI tarafında 'Eğer gelen durum PhotoState ise...' diyebilmek için bir çatı oluşturuyoruz.
@@ -15,7 +15,7 @@ class PhotoLoading extends PhotoState {}
 // 3. Başarılı Durumu
 class PhotoLoaded extends PhotoState {
   // Drift'in ürettiği "OfflinePhotosTableData" sınıfından bir liste alıyoruz.
-  final List<OfflinePhotosTableData> photos;
+  final List<PhotoWithLocation> photos;
 
   // Constructor
   PhotoLoaded(this.photos);

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/database/app_database.dart';
+import '../../../rooms/presentation/cubit/room_cubit.dart';
+import '../../../rooms/presentation/pages/room_list_page.dart';
 import '../cubit/floor_cubit.dart';
 import '../cubit/floor_state.dart';
 
@@ -44,7 +47,9 @@ class _FloorListPageState extends State<FloorListPage> {
 
           if (state is FloorLoaded) {
             if (state.floors.isEmpty) {
-              return const Center(child: Text('Bu binaya henüz kat eklenmedi.'));
+              return const Center(
+                child: Text('Bu binaya henüz kat eklenmedi.'),
+              );
             }
 
             return ListView.builder(
@@ -58,6 +63,20 @@ class _FloorListPageState extends State<FloorListPage> {
                   title: Text(floor.name),
                   // Bina adı Floor tablosundan değil, JOIN sonucundan gelir.
                   subtitle: Text('Bina: ${result.buildingName}'),
+                  onTap: () {
+                    final database = context.read<AppDatabase>();
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => BlocProvider(
+                          create: (_) => RoomCubit(database.roomDao),
+                          child: RoomListPage(
+                            floorId: floor.id,
+                            floorName: floor.name,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                   trailing: IconButton(
                     tooltip: 'Katı sil',
                     icon: const Icon(Icons.delete_outline),
@@ -83,6 +102,8 @@ class _FloorListPageState extends State<FloorListPage> {
   Future<void> _showAddFloorDialog(BuildContext context) async {
     final nameController = TextEditingController();
     final numberController = TextEditingController();
+    final firstRoomController = TextEditingController();
+    final firstRoomAreaController = TextEditingController();
 
     await showDialog<void>(
       context: context,
@@ -98,6 +119,19 @@ class _FloorListPageState extends State<FloorListPage> {
                   labelText: 'Kat adı',
                   hintText: 'Zemin Kat',
                 ),
+              ),
+              TextField(
+                controller: firstRoomController,
+                decoration: const InputDecoration(
+                  labelText: 'İlk oda (opsiyonel transaction)',
+                ),
+              ),
+              TextField(
+                controller: firstRoomAreaController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(labelText: 'İlk oda alanı'),
               ),
               TextField(
                 controller: numberController,
@@ -120,16 +154,32 @@ class _FloorListPageState extends State<FloorListPage> {
               onPressed: () {
                 final name = nameController.text.trim();
                 final floorNumber = int.tryParse(numberController.text.trim());
+                final firstRoom = firstRoomController.text.trim();
+                final firstRoomArea = double.tryParse(
+                  firstRoomAreaController.text.trim().replaceAll(',', '.'),
+                );
 
-                if (name.isEmpty || floorNumber == null) {
+                if (name.isEmpty ||
+                    floorNumber == null ||
+                    (firstRoom.isNotEmpty && firstRoomArea == null)) {
                   return;
                 }
 
-                context.read<FloorCubit>().addFloor(
-                  buildingId: widget.buildingId,
-                  name: name,
-                  floorNumber: floorNumber,
-                );
+                if (firstRoom.isEmpty) {
+                  context.read<FloorCubit>().addFloor(
+                    buildingId: widget.buildingId,
+                    name: name,
+                    floorNumber: floorNumber,
+                  );
+                } else {
+                  context.read<FloorCubit>().addFloorWithFirstRoom(
+                    buildingId: widget.buildingId,
+                    floorName: name,
+                    floorNumber: floorNumber,
+                    roomName: firstRoom,
+                    roomArea: firstRoomArea!,
+                  );
+                }
                 Navigator.pop(dialogContext);
               },
               child: const Text('Kaydet'),
@@ -141,5 +191,7 @@ class _FloorListPageState extends State<FloorListPage> {
 
     nameController.dispose();
     numberController.dispose();
+    firstRoomController.dispose();
+    firstRoomAreaController.dispose();
   }
 }

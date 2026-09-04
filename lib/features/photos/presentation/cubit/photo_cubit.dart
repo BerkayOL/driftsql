@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-import '../../../../core/database/app_database.dart';
 import 'photo_state.dart';
 
 class PhotoCubit extends Cubit<PhotoState> {
@@ -21,8 +20,7 @@ class PhotoCubit extends Cubit<PhotoState> {
   ///
   /// Bu subscription sayesinde Cubit,
   /// database değişikliklerini sürekli takip edebilir.
-  StreamSubscription<List<OfflinePhotosTableData>>?
-      _photosSubscription;
+  StreamSubscription<List<PhotoWithLocation>>? _photosSubscription;
 
   PhotoCubit(this._photoDao) : super(PhotoInitial());
 
@@ -33,69 +31,55 @@ class PhotoCubit extends Cubit<PhotoState> {
   ///
   /// Şimdi:
   /// watchAllPhotos() ile tabloyu sürekli izliyoruz.
-  Future<void> watchPhotos() async {
+  Future<void> watchPhotos({int? roomId}) async {
     emit(PhotoLoading());
 
     // Bu metod birden fazla kez çağrılırsa
     // eski dinleyiciyi kapatıp yenisini oluşturuyoruz.
     await _photosSubscription?.cancel();
 
-    _photosSubscription = _photoDao.watchAllPhotos().listen(
-      (photos) {
-        // Database değiştiğinde Drift bize yeni listeyi gönderir.
-        if (!isClosed) {
-          emit(PhotoLoaded(photos));
-        }
-      },
-      onError: (Object error, StackTrace stackTrace) {
-        if (!isClosed) {
-          emit(
-            PhotoError(
-              'Fotoğraflar izlenirken bir hata oluştu: $error',
-            ),
-          );
-        }
-      },
-    );
+    _photosSubscription = _photoDao
+        .watchPhotosWithLocation(roomId: roomId)
+        .listen(
+          (photos) {
+            // Database değiştiğinde Drift bize yeni listeyi gönderir.
+            if (!isClosed) {
+              emit(PhotoLoaded(photos));
+            }
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (!isClosed) {
+              emit(
+                PhotoError('Fotoğraflar izlenirken bir hata oluştu: $error'),
+              );
+            }
+          },
+        );
   }
 
   /// Kamera veya galeriden fotoğraf alır,
   /// kalıcı dosya alanına kaydeder
   /// ve database'e local path bilgisini ekler.
-  Future<void> pickAndSavePhoto(ImageSource source) async {
+  Future<void> pickAndSavePhoto(ImageSource source, {int? roomId}) async {
     try {
-      final XFile? pickedFile = await _picker.pickImage(
-        source: source,
-      );
+      final XFile? pickedFile = await _picker.pickImage(source: source);
 
       if (pickedFile == null) return;
 
       emit(PhotoLoading());
 
-      final directory =
-          await getApplicationDocumentsDirectory();
+      final directory = await getApplicationDocumentsDirectory();
 
-      final fileName = path.basename(
-        pickedFile.path,
-      );
+      final fileName = path.basename(pickedFile.path);
 
-      final savedImage = File(
-        path.join(
-          directory.path,
-          fileName,
-        ),
-      );
+      final savedImage = File(path.join(directory.path, fileName));
 
       // ImagePicker'ın geçici dosyasını
       // uygulamanın kalıcı klasörüne kopyalıyoruz.
-      await File(
-        pickedFile.path,
-      ).copy(savedImage.path);
+      await File(pickedFile.path).copy(savedImage.path);
 
       // Database kaydını DAO oluşturuyor.
-      await _photoDao.insertPhoto(
-        imagePath: savedImage.path,
-      );
+      await _photoDao.insertPhoto(imagePath: savedImage.path, roomId: roomId);
 
       // DİKKAT:
       // Artık loadPhotos() çağırmıyoruz.
@@ -103,40 +87,29 @@ class PhotoCubit extends Cubit<PhotoState> {
       // INSERT gerçekleşince Drift'in .watch() sorgusu
       // değişikliği otomatik algılayacak ve yeni listeyi yayınlayacak.
     } catch (e) {
-      emit(
-        PhotoError(
-          'Fotoğraf kaydedilirken bir hata oluştu: $e',
-        ),
-      );
+      emit(PhotoError('Fotoğraf kaydedilirken bir hata oluştu: $e'));
     }
   }
 
   /// Fotoğrafın fiziksel dosyasını
   /// ve database kaydını siler.
-  Future<void> deletePhoto(
-    OfflinePhotosTableData photo,
-  ) async {
+  Future<void> deletePhoto(PhotoWithLocation result) async {
     try {
+      final photo = result.photo;
       final file = File(photo.imagePath);
 
       if (await file.exists()) {
         await file.delete();
       }
 
-      await _photoDao.deletePhotoById(
-        photo.id,
-      );
+      await _photoDao.deletePhotoById(photo.id);
 
       // Artık burada da loadPhotos() yok.
       //
       // DELETE işlemi database'i değiştirdiği için
       // .watch() otomatik olarak yeni liste yayınlayacak.
     } catch (e) {
-      emit(
-        PhotoError(
-          'Fotoğraf silinirken bir hata oluştu: $e',
-        ),
-      );
+      emit(PhotoError('Fotoğraf silinirken bir hata oluştu: $e'));
     }
   }
 

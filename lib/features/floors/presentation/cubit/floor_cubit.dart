@@ -65,6 +65,28 @@ class FloorCubit extends Cubit<FloorState> {
     }
   }
 
+  Future<void> addFloorWithFirstRoom({
+    required int buildingId,
+    required String floorName,
+    required int floorNumber,
+    required String roomName,
+    required double roomArea,
+  }) async {
+    try {
+      await _floorDao.insertFloorWithFirstRoom(
+        buildingId: buildingId,
+        floorName: floorName.trim(),
+        floorNumber: floorNumber,
+        roomName: roomName.trim(),
+        roomArea: roomArea,
+      );
+    } catch (error) {
+      if (!isClosed) {
+        emit(FloorError('Kat ve ilk oda eklenirken hata oluştu: $error'));
+      }
+    }
+  }
+
   @override
   Future<void> close() async {
     await _floorsSubscription?.cancel();

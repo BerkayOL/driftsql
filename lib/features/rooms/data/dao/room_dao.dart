@@ -25,6 +25,18 @@ class RoomWithLocation {
   });
 }
 
+final class RoomReport {
+  final int roomCount;
+  final double totalArea;
+  final double? averageTargetTemperature;
+
+  const RoomReport({
+    required this.roomCount,
+    required this.totalArea,
+    required this.averageTargetTemperature,
+  });
+}
+
 /// Odalarla ilgili local database işlemlerini yöneten DAO.
 ///
 /// RoomDao:
@@ -82,7 +94,7 @@ class RoomDao extends DatabaseAccessor<AppDatabase> with _$RoomDaoMixin {
   ///
   /// Böylece Room kaydının içinde buildingId tutmamıza gerek
   /// kalmadan odanın hangi binaya ait olduğunu bulabiliriz.
-  Stream<List<RoomWithLocation>> watchRoomsWithLocation() {
+  Stream<List<RoomWithLocation>> watchRoomsWithLocation({int? floorId}) {
     final query = select(roomsTable).join([
       /// Room.floorId = Floor.id
       innerJoin(floorsTable, floorsTable.id.equalsExp(roomsTable.floorId)),
@@ -93,6 +105,10 @@ class RoomDao extends DatabaseAccessor<AppDatabase> with _$RoomDaoMixin {
         buildingsTable.id.equalsExp(floorsTable.buildingId),
       ),
     ]);
+
+    if (floorId != null) {
+      query.where(roomsTable.floorId.equals(floorId));
+    }
 
     /// JOIN sorguları doğrudan tek bir table data class dönmez.
     ///
@@ -108,5 +124,58 @@ class RoomDao extends DatabaseAccessor<AppDatabase> with _$RoomDaoMixin {
         );
       }).toList();
     });
+  }
+
+  /// Ülke + yapım yılı + ısıtma durumunu üç tablo üzerinde filtreler.
+  Stream<List<RoomWithLocation>> watchHeatedRoomsByBuildingCriteria({
+    required String countryCode,
+    required int builtBefore,
+  }) {
+    final query =
+        select(roomsTable).join([
+            innerJoin(
+              floorsTable,
+              floorsTable.id.equalsExp(roomsTable.floorId),
+            ),
+            innerJoin(
+              buildingsTable,
+              buildingsTable.id.equalsExp(floorsTable.buildingId),
+            ),
+          ])
+          ..where(
+            roomsTable.isHeated.equals(true) &
+                buildingsTable.countryCode.equals(countryCode) &
+                buildingsTable.constructionYear.isSmallerThanValue(builtBefore),
+          )
+          ..orderBy([OrderingTerm.asc(roomsTable.name)]);
+
+    return query.watch().map(
+      (rows) => rows
+          .map(
+            (row) => RoomWithLocation(
+              room: row.readTable(roomsTable),
+              floor: row.readTable(floorsTable),
+              building: row.readTable(buildingsTable),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  /// COUNT / SUM / AVG ifadelerini SQLite içinde hesaplayan reactive rapor.
+  Stream<RoomReport> watchRoomReport() {
+    final roomCount = roomsTable.id.count();
+    final totalArea = roomsTable.area.sum();
+    final averageTemperature = roomsTable.targetTemperature.avg();
+    final query = selectOnly(roomsTable)
+      ..addColumns([roomCount, totalArea, averageTemperature]);
+
+    return query.watchSingle().map(
+      (row) => RoomReport(
+        roomCount: row.read(roomCount) ?? 0,
+        totalArea: row.read(totalArea) ?? 0,
+        averageTargetTemperature: row.read(averageTemperature),
+      ),
+    );
   }
 }

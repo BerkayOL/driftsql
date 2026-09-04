@@ -3,260 +3,6 @@
 part of 'app_database.dart';
 
 // ignore_for_file: type=lint
-class $OfflinePhotosTableTable extends OfflinePhotosTable
-    with TableInfo<$OfflinePhotosTableTable, OfflinePhotosTableData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $OfflinePhotosTableTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-    'id',
-    aliasedName,
-    false,
-    hasAutoIncrement: true,
-    type: DriftSqlType.int,
-    requiredDuringInsert: false,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'PRIMARY KEY AUTOINCREMENT',
-    ),
-  );
-  static const VerificationMeta _imagePathMeta = const VerificationMeta(
-    'imagePath',
-  );
-  @override
-  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
-    'image_path',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _createdAtMeta = const VerificationMeta(
-    'createdAt',
-  );
-  @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-    'created_at',
-    aliasedName,
-    false,
-    type: DriftSqlType.dateTime,
-    requiredDuringInsert: false,
-    defaultValue: currentDateAndTime,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [id, imagePath, createdAt];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'offline_photos_table';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<OfflinePhotosTableData> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('image_path')) {
-      context.handle(
-        _imagePathMeta,
-        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_imagePathMeta);
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(
-        _createdAtMeta,
-        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
-      );
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  OfflinePhotosTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return OfflinePhotosTableData(
-      id: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}id'],
-      )!,
-      imagePath: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}image_path'],
-      )!,
-      createdAt: attachedDatabase.typeMapping.read(
-        DriftSqlType.dateTime,
-        data['${effectivePrefix}created_at'],
-      )!,
-    );
-  }
-
-  @override
-  $OfflinePhotosTableTable createAlias(String alias) {
-    return $OfflinePhotosTableTable(attachedDatabase, alias);
-  }
-}
-
-class OfflinePhotosTableData extends DataClass
-    implements Insertable<OfflinePhotosTableData> {
-  final int id;
-  final String imagePath;
-  final DateTime createdAt;
-  const OfflinePhotosTableData({
-    required this.id,
-    required this.imagePath,
-    required this.createdAt,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['image_path'] = Variable<String>(imagePath);
-    map['created_at'] = Variable<DateTime>(createdAt);
-    return map;
-  }
-
-  OfflinePhotosTableCompanion toCompanion(bool nullToAbsent) {
-    return OfflinePhotosTableCompanion(
-      id: Value(id),
-      imagePath: Value(imagePath),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory OfflinePhotosTableData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return OfflinePhotosTableData(
-      id: serializer.fromJson<int>(json['id']),
-      imagePath: serializer.fromJson<String>(json['imagePath']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'imagePath': serializer.toJson<String>(imagePath),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  OfflinePhotosTableData copyWith({
-    int? id,
-    String? imagePath,
-    DateTime? createdAt,
-  }) => OfflinePhotosTableData(
-    id: id ?? this.id,
-    imagePath: imagePath ?? this.imagePath,
-    createdAt: createdAt ?? this.createdAt,
-  );
-  OfflinePhotosTableData copyWithCompanion(OfflinePhotosTableCompanion data) {
-    return OfflinePhotosTableData(
-      id: data.id.present ? data.id.value : this.id,
-      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('OfflinePhotosTableData(')
-          ..write('id: $id, ')
-          ..write('imagePath: $imagePath, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, imagePath, createdAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is OfflinePhotosTableData &&
-          other.id == this.id &&
-          other.imagePath == this.imagePath &&
-          other.createdAt == this.createdAt);
-}
-
-class OfflinePhotosTableCompanion
-    extends UpdateCompanion<OfflinePhotosTableData> {
-  final Value<int> id;
-  final Value<String> imagePath;
-  final Value<DateTime> createdAt;
-  const OfflinePhotosTableCompanion({
-    this.id = const Value.absent(),
-    this.imagePath = const Value.absent(),
-    this.createdAt = const Value.absent(),
-  });
-  OfflinePhotosTableCompanion.insert({
-    this.id = const Value.absent(),
-    required String imagePath,
-    this.createdAt = const Value.absent(),
-  }) : imagePath = Value(imagePath);
-  static Insertable<OfflinePhotosTableData> custom({
-    Expression<int>? id,
-    Expression<String>? imagePath,
-    Expression<DateTime>? createdAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (imagePath != null) 'image_path': imagePath,
-      if (createdAt != null) 'created_at': createdAt,
-    });
-  }
-
-  OfflinePhotosTableCompanion copyWith({
-    Value<int>? id,
-    Value<String>? imagePath,
-    Value<DateTime>? createdAt,
-  }) {
-    return OfflinePhotosTableCompanion(
-      id: id ?? this.id,
-      imagePath: imagePath ?? this.imagePath,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (imagePath.present) {
-      map['image_path'] = Variable<String>(imagePath.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('OfflinePhotosTableCompanion(')
-          ..write('id: $id, ')
-          ..write('imagePath: $imagePath, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $BuildingsTableTable extends BuildingsTable
     with TableInfo<$BuildingsTableTable, BuildingsTableData> {
   @override
@@ -1530,14 +1276,319 @@ class RoomsTableCompanion extends UpdateCompanion<RoomsTableData> {
   }
 }
 
+class $OfflinePhotosTableTable extends OfflinePhotosTable
+    with TableInfo<$OfflinePhotosTableTable, OfflinePhotosTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OfflinePhotosTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _imagePathMeta = const VerificationMeta(
+    'imagePath',
+  );
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+    'image_path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _roomIdMeta = const VerificationMeta('roomId');
+  @override
+  late final GeneratedColumn<int> roomId = GeneratedColumn<int>(
+    'room_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES rooms_table (id) ON DELETE SET NULL',
+    ),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, imagePath, roomId, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'offline_photos_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OfflinePhotosTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(
+        _imagePathMeta,
+        imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_imagePathMeta);
+    }
+    if (data.containsKey('room_id')) {
+      context.handle(
+        _roomIdMeta,
+        roomId.isAcceptableOrUnknown(data['room_id']!, _roomIdMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  OfflinePhotosTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OfflinePhotosTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      imagePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image_path'],
+      )!,
+      roomId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}room_id'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $OfflinePhotosTableTable createAlias(String alias) {
+    return $OfflinePhotosTableTable(attachedDatabase, alias);
+  }
+}
+
+class OfflinePhotosTableData extends DataClass
+    implements Insertable<OfflinePhotosTableData> {
+  final int id;
+  final String imagePath;
+
+  /// Eski fotoğraflar atanmamış kalabilsin diye nullable foreign key.
+  /// Oda silinirse dosya ve fotoğraf kaydı korunur, yalnızca ilişki kaldırılır.
+  final int? roomId;
+  final DateTime createdAt;
+  const OfflinePhotosTableData({
+    required this.id,
+    required this.imagePath,
+    this.roomId,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['image_path'] = Variable<String>(imagePath);
+    if (!nullToAbsent || roomId != null) {
+      map['room_id'] = Variable<int>(roomId);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  OfflinePhotosTableCompanion toCompanion(bool nullToAbsent) {
+    return OfflinePhotosTableCompanion(
+      id: Value(id),
+      imagePath: Value(imagePath),
+      roomId: roomId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(roomId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory OfflinePhotosTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OfflinePhotosTableData(
+      id: serializer.fromJson<int>(json['id']),
+      imagePath: serializer.fromJson<String>(json['imagePath']),
+      roomId: serializer.fromJson<int?>(json['roomId']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'imagePath': serializer.toJson<String>(imagePath),
+      'roomId': serializer.toJson<int?>(roomId),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  OfflinePhotosTableData copyWith({
+    int? id,
+    String? imagePath,
+    Value<int?> roomId = const Value.absent(),
+    DateTime? createdAt,
+  }) => OfflinePhotosTableData(
+    id: id ?? this.id,
+    imagePath: imagePath ?? this.imagePath,
+    roomId: roomId.present ? roomId.value : this.roomId,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  OfflinePhotosTableData copyWithCompanion(OfflinePhotosTableCompanion data) {
+    return OfflinePhotosTableData(
+      id: data.id.present ? data.id.value : this.id,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      roomId: data.roomId.present ? data.roomId.value : this.roomId,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OfflinePhotosTableData(')
+          ..write('id: $id, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('roomId: $roomId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, imagePath, roomId, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OfflinePhotosTableData &&
+          other.id == this.id &&
+          other.imagePath == this.imagePath &&
+          other.roomId == this.roomId &&
+          other.createdAt == this.createdAt);
+}
+
+class OfflinePhotosTableCompanion
+    extends UpdateCompanion<OfflinePhotosTableData> {
+  final Value<int> id;
+  final Value<String> imagePath;
+  final Value<int?> roomId;
+  final Value<DateTime> createdAt;
+  const OfflinePhotosTableCompanion({
+    this.id = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.roomId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  OfflinePhotosTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String imagePath,
+    this.roomId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : imagePath = Value(imagePath);
+  static Insertable<OfflinePhotosTableData> custom({
+    Expression<int>? id,
+    Expression<String>? imagePath,
+    Expression<int>? roomId,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (imagePath != null) 'image_path': imagePath,
+      if (roomId != null) 'room_id': roomId,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  OfflinePhotosTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? imagePath,
+    Value<int?>? roomId,
+    Value<DateTime>? createdAt,
+  }) {
+    return OfflinePhotosTableCompanion(
+      id: id ?? this.id,
+      imagePath: imagePath ?? this.imagePath,
+      roomId: roomId ?? this.roomId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (roomId.present) {
+      map['room_id'] = Variable<int>(roomId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OfflinePhotosTableCompanion(')
+          ..write('id: $id, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('roomId: $roomId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $OfflinePhotosTableTable offlinePhotosTable =
-      $OfflinePhotosTableTable(this);
   late final $BuildingsTableTable buildingsTable = $BuildingsTableTable(this);
   late final $FloorsTableTable floorsTable = $FloorsTableTable(this);
   late final $RoomsTableTable roomsTable = $RoomsTableTable(this);
+  late final $OfflinePhotosTableTable offlinePhotosTable =
+      $OfflinePhotosTableTable(this);
   late final PhotoDao photoDao = PhotoDao(this as AppDatabase);
   late final BuildingDao buildingDao = BuildingDao(this as AppDatabase);
   late final FloorDao floorDao = FloorDao(this as AppDatabase);
@@ -1547,10 +1598,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
-    offlinePhotosTable,
     buildingsTable,
     floorsTable,
     roomsTable,
+    offlinePhotosTable,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -1568,178 +1619,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       ),
       result: [TableUpdate('rooms_table', kind: UpdateKind.delete)],
     ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'rooms_table',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('offline_photos_table', kind: UpdateKind.update)],
+    ),
   ]);
 }
 
-typedef $$OfflinePhotosTableTableCreateCompanionBuilder =
-    OfflinePhotosTableCompanion Function({
-      Value<int> id,
-      required String imagePath,
-      Value<DateTime> createdAt,
-    });
-typedef $$OfflinePhotosTableTableUpdateCompanionBuilder =
-    OfflinePhotosTableCompanion Function({
-      Value<int> id,
-      Value<String> imagePath,
-      Value<DateTime> createdAt,
-    });
-
-class $$OfflinePhotosTableTableFilterComposer
-    extends Composer<_$AppDatabase, $OfflinePhotosTableTable> {
-  $$OfflinePhotosTableTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get imagePath => $composableBuilder(
-    column: $table.imagePath,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$OfflinePhotosTableTableOrderingComposer
-    extends Composer<_$AppDatabase, $OfflinePhotosTableTable> {
-  $$OfflinePhotosTableTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get imagePath => $composableBuilder(
-    column: $table.imagePath,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-    column: $table.createdAt,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$OfflinePhotosTableTableAnnotationComposer
-    extends Composer<_$AppDatabase, $OfflinePhotosTableTable> {
-  $$OfflinePhotosTableTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get imagePath =>
-      $composableBuilder(column: $table.imagePath, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
-}
-
-class $$OfflinePhotosTableTableTableManager
-    extends
-        RootTableManager<
-          _$AppDatabase,
-          $OfflinePhotosTableTable,
-          OfflinePhotosTableData,
-          $$OfflinePhotosTableTableFilterComposer,
-          $$OfflinePhotosTableTableOrderingComposer,
-          $$OfflinePhotosTableTableAnnotationComposer,
-          $$OfflinePhotosTableTableCreateCompanionBuilder,
-          $$OfflinePhotosTableTableUpdateCompanionBuilder,
-          (
-            OfflinePhotosTableData,
-            BaseReferences<
-              _$AppDatabase,
-              $OfflinePhotosTableTable,
-              OfflinePhotosTableData
-            >,
-          ),
-          OfflinePhotosTableData,
-          PrefetchHooks Function()
-        > {
-  $$OfflinePhotosTableTableTableManager(
-    _$AppDatabase db,
-    $OfflinePhotosTableTable table,
-  ) : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$OfflinePhotosTableTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$OfflinePhotosTableTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$OfflinePhotosTableTableAnnotationComposer(
-                $db: db,
-                $table: table,
-              ),
-          updateCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                Value<String> imagePath = const Value.absent(),
-                Value<DateTime> createdAt = const Value.absent(),
-              }) => OfflinePhotosTableCompanion(
-                id: id,
-                imagePath: imagePath,
-                createdAt: createdAt,
-              ),
-          createCompanionCallback:
-              ({
-                Value<int> id = const Value.absent(),
-                required String imagePath,
-                Value<DateTime> createdAt = const Value.absent(),
-              }) => OfflinePhotosTableCompanion.insert(
-                id: id,
-                imagePath: imagePath,
-                createdAt: createdAt,
-              ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$OfflinePhotosTableTableProcessedTableManager =
-    ProcessedTableManager<
-      _$AppDatabase,
-      $OfflinePhotosTableTable,
-      OfflinePhotosTableData,
-      $$OfflinePhotosTableTableFilterComposer,
-      $$OfflinePhotosTableTableOrderingComposer,
-      $$OfflinePhotosTableTableAnnotationComposer,
-      $$OfflinePhotosTableTableCreateCompanionBuilder,
-      $$OfflinePhotosTableTableUpdateCompanionBuilder,
-      (
-        OfflinePhotosTableData,
-        BaseReferences<
-          _$AppDatabase,
-          $OfflinePhotosTableTable,
-          OfflinePhotosTableData
-        >,
-      ),
-      OfflinePhotosTableData,
-      PrefetchHooks Function()
-    >;
 typedef $$BuildingsTableTableCreateCompanionBuilder =
     BuildingsTableCompanion Function({
       Value<int> id,
@@ -2498,6 +2387,30 @@ final class $$RoomsTableTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<
+    $OfflinePhotosTableTable,
+    List<OfflinePhotosTableData>
+  >
+  _offlinePhotosTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.offlinePhotosTable,
+        aliasName: 'rooms_table__id__offline_photos_table__room_id',
+      );
+
+  $$OfflinePhotosTableTableProcessedTableManager get offlinePhotosTableRefs {
+    final manager = $$OfflinePhotosTableTableTableManager(
+      $_db,
+      $_db.offlinePhotosTable,
+    ).filter((f) => f.roomId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _offlinePhotosTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$RoomsTableTableFilterComposer
@@ -2560,6 +2473,31 @@ class $$RoomsTableTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> offlinePhotosTableRefs(
+    Expression<bool> Function($$OfflinePhotosTableTableFilterComposer f) f,
+  ) {
+    final $$OfflinePhotosTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.offlinePhotosTable,
+      getReferencedColumn: (t) => t.roomId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$OfflinePhotosTableTableFilterComposer(
+            $db: $db,
+            $table: $db.offlinePhotosTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -2677,6 +2615,32 @@ class $$RoomsTableTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> offlinePhotosTableRefs<T extends Object>(
+    Expression<T> Function($$OfflinePhotosTableTableAnnotationComposer a) f,
+  ) {
+    final $$OfflinePhotosTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.offlinePhotosTable,
+          getReferencedColumn: (t) => t.roomId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$OfflinePhotosTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.offlinePhotosTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
 }
 
 class $$RoomsTableTableTableManager
@@ -2692,7 +2656,7 @@ class $$RoomsTableTableTableManager
           $$RoomsTableTableUpdateCompanionBuilder,
           (RoomsTableData, $$RoomsTableTableReferences),
           RoomsTableData,
-          PrefetchHooks Function({bool floorId})
+          PrefetchHooks Function({bool floorId, bool offlinePhotosTableRefs})
         > {
   $$RoomsTableTableTableManager(_$AppDatabase db, $RoomsTableTable table)
     : super(
@@ -2749,7 +2713,339 @@ class $$RoomsTableTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({floorId = false}) {
+          prefetchHooksCallback:
+              ({floorId = false, offlinePhotosTableRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (offlinePhotosTableRefs) db.offlinePhotosTable,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (floorId) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.floorId,
+                                    referencedTable: $$RoomsTableTableReferences
+                                        ._floorIdTable(db),
+                                    referencedColumn:
+                                        $$RoomsTableTableReferences
+                                            ._floorIdTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
+
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (offlinePhotosTableRefs)
+                        await $_getPrefetchedData<
+                          RoomsTableData,
+                          $RoomsTableTable,
+                          OfflinePhotosTableData
+                        >(
+                          currentTable: table,
+                          referencedTable: $$RoomsTableTableReferences
+                              ._offlinePhotosTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$RoomsTableTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).offlinePhotosTableRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.roomId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
+              },
+        ),
+      );
+}
+
+typedef $$RoomsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RoomsTableTable,
+      RoomsTableData,
+      $$RoomsTableTableFilterComposer,
+      $$RoomsTableTableOrderingComposer,
+      $$RoomsTableTableAnnotationComposer,
+      $$RoomsTableTableCreateCompanionBuilder,
+      $$RoomsTableTableUpdateCompanionBuilder,
+      (RoomsTableData, $$RoomsTableTableReferences),
+      RoomsTableData,
+      PrefetchHooks Function({bool floorId, bool offlinePhotosTableRefs})
+    >;
+typedef $$OfflinePhotosTableTableCreateCompanionBuilder =
+    OfflinePhotosTableCompanion Function({
+      Value<int> id,
+      required String imagePath,
+      Value<int?> roomId,
+      Value<DateTime> createdAt,
+    });
+typedef $$OfflinePhotosTableTableUpdateCompanionBuilder =
+    OfflinePhotosTableCompanion Function({
+      Value<int> id,
+      Value<String> imagePath,
+      Value<int?> roomId,
+      Value<DateTime> createdAt,
+    });
+
+final class $$OfflinePhotosTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $OfflinePhotosTableTable,
+          OfflinePhotosTableData
+        > {
+  $$OfflinePhotosTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $RoomsTableTable _roomIdTable(_$AppDatabase db) => db.roomsTable
+      .createAlias('offline_photos_table__room_id__rooms_table__id');
+
+  $$RoomsTableTableProcessedTableManager? get roomId {
+    final $_column = $_itemColumn<int>('room_id');
+    if ($_column == null) return null;
+    final manager = $$RoomsTableTableTableManager(
+      $_db,
+      $_db.roomsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_roomIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$OfflinePhotosTableTableFilterComposer
+    extends Composer<_$AppDatabase, $OfflinePhotosTableTable> {
+  $$OfflinePhotosTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$RoomsTableTableFilterComposer get roomId {
+    final $$RoomsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roomId,
+      referencedTable: $db.roomsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.roomsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$OfflinePhotosTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $OfflinePhotosTableTable> {
+  $$OfflinePhotosTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+    column: $table.imagePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$RoomsTableTableOrderingComposer get roomId {
+    final $$RoomsTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roomId,
+      referencedTable: $db.roomsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomsTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.roomsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$OfflinePhotosTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OfflinePhotosTableTable> {
+  $$OfflinePhotosTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$RoomsTableTableAnnotationComposer get roomId {
+    final $$RoomsTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.roomId,
+      referencedTable: $db.roomsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$RoomsTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.roomsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$OfflinePhotosTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OfflinePhotosTableTable,
+          OfflinePhotosTableData,
+          $$OfflinePhotosTableTableFilterComposer,
+          $$OfflinePhotosTableTableOrderingComposer,
+          $$OfflinePhotosTableTableAnnotationComposer,
+          $$OfflinePhotosTableTableCreateCompanionBuilder,
+          $$OfflinePhotosTableTableUpdateCompanionBuilder,
+          (OfflinePhotosTableData, $$OfflinePhotosTableTableReferences),
+          OfflinePhotosTableData,
+          PrefetchHooks Function({bool roomId})
+        > {
+  $$OfflinePhotosTableTableTableManager(
+    _$AppDatabase db,
+    $OfflinePhotosTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OfflinePhotosTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OfflinePhotosTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OfflinePhotosTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> imagePath = const Value.absent(),
+                Value<int?> roomId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => OfflinePhotosTableCompanion(
+                id: id,
+                imagePath: imagePath,
+                roomId: roomId,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String imagePath,
+                Value<int?> roomId = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => OfflinePhotosTableCompanion.insert(
+                id: id,
+                imagePath: imagePath,
+                roomId: roomId,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$OfflinePhotosTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({roomId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -2769,16 +3065,18 @@ class $$RoomsTableTableTableManager
                       dynamic
                     >
                   >(state) {
-                    if (floorId) {
+                    if (roomId) {
                       state =
                           state.withJoin(
                                 currentTable: table,
-                                currentColumn: table.floorId,
-                                referencedTable: $$RoomsTableTableReferences
-                                    ._floorIdTable(db),
-                                referencedColumn: $$RoomsTableTableReferences
-                                    ._floorIdTable(db)
-                                    .id,
+                                currentColumn: table.roomId,
+                                referencedTable:
+                                    $$OfflinePhotosTableTableReferences
+                                        ._roomIdTable(db),
+                                referencedColumn:
+                                    $$OfflinePhotosTableTableReferences
+                                        ._roomIdTable(db)
+                                        .id,
                               )
                               as T;
                     }
@@ -2794,30 +3092,30 @@ class $$RoomsTableTableTableManager
       );
 }
 
-typedef $$RoomsTableTableProcessedTableManager =
+typedef $$OfflinePhotosTableTableProcessedTableManager =
     ProcessedTableManager<
       _$AppDatabase,
-      $RoomsTableTable,
-      RoomsTableData,
-      $$RoomsTableTableFilterComposer,
-      $$RoomsTableTableOrderingComposer,
-      $$RoomsTableTableAnnotationComposer,
-      $$RoomsTableTableCreateCompanionBuilder,
-      $$RoomsTableTableUpdateCompanionBuilder,
-      (RoomsTableData, $$RoomsTableTableReferences),
-      RoomsTableData,
-      PrefetchHooks Function({bool floorId})
+      $OfflinePhotosTableTable,
+      OfflinePhotosTableData,
+      $$OfflinePhotosTableTableFilterComposer,
+      $$OfflinePhotosTableTableOrderingComposer,
+      $$OfflinePhotosTableTableAnnotationComposer,
+      $$OfflinePhotosTableTableCreateCompanionBuilder,
+      $$OfflinePhotosTableTableUpdateCompanionBuilder,
+      (OfflinePhotosTableData, $$OfflinePhotosTableTableReferences),
+      OfflinePhotosTableData,
+      PrefetchHooks Function({bool roomId})
     >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$OfflinePhotosTableTableTableManager get offlinePhotosTable =>
-      $$OfflinePhotosTableTableTableManager(_db, _db.offlinePhotosTable);
   $$BuildingsTableTableTableManager get buildingsTable =>
       $$BuildingsTableTableTableManager(_db, _db.buildingsTable);
   $$FloorsTableTableTableManager get floorsTable =>
       $$FloorsTableTableTableManager(_db, _db.floorsTable);
   $$RoomsTableTableTableManager get roomsTable =>
       $$RoomsTableTableTableManager(_db, _db.roomsTable);
+  $$OfflinePhotosTableTableTableManager get offlinePhotosTable =>
+      $$OfflinePhotosTableTableTableManager(_db, _db.offlinePhotosTable);
 }

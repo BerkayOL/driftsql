@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../buildings/presentation/pages/building_list_page.dart';
 import '../../../photos/presentation/pages/photo_list_page.dart';
+import '../../../rooms/presentation/pages/room_report_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,7 +14,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
-  static const _pages = [BuildingListPage(), PhotoListPage()];
+  static const _pages = [BuildingListPage(), PhotoListPage(), RoomReportPage()];
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +37,11 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(Icons.photo_outlined),
             selectedIcon: Icon(Icons.photo),
             label: 'Fotoğraflar',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.query_stats_outlined),
+            selectedIcon: Icon(Icons.query_stats),
+            label: 'Rapor',
           ),
         ],
       ),
