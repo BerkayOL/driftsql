@@ -1,31 +1,27 @@
-// app_database.dart dosyamızı import ediyoruz çünkü Drift'in bizim için ürettiği
-// "OfflinePhotosTableData" (fotoğraf nesnesi) sınıfını kullanacağız.
+// PhotoWithLocation sorgu sonuç tipini kullanacağımız için DAO'yu import ediyoruz.
 import '../../data/dao/photo_dao.dart';
 
-// Tüm durumların atası olan temel sınıf.
-// UI tarafında 'Eğer gelen durum PhotoState ise...' diyebilmek için bir çatı oluşturuyoruz.
+/// Fotoğraf ekranının gösterebileceği durumların ortak üst tipidir.
 abstract class PhotoState {}
 
-// 1. Başlangıç Durumu
+/// PhotoCubit oluşturuldu fakat fotoğraf sorgusu henüz başlatılmadı.
 class PhotoInitial extends PhotoState {}
 
-// 2. Yükleniyor Durumu (Ekranda CircularProgressIndicator göstermek için kullanacağız)
+/// Fotoğraf seçme/kopyalama yapılırken veya ilk sorgu sonucu beklenirken kullanılır.
 class PhotoLoading extends PhotoState {}
 
-// 3. Başarılı Durumu
+/// Fotoğraflar, varsa oda/kat/bina bilgileriyle birlikte başarıyla geldi.
 class PhotoLoaded extends PhotoState {
-  // Drift'in ürettiği "OfflinePhotosTableData" sınıfından bir liste alıyoruz.
+  /// Bu liste yalnızca fotoğrafı değil, LEFT JOIN ile bulunan konumunu da taşır.
   final List<PhotoWithLocation> photos;
 
-  // Constructor
   PhotoLoaded(this.photos);
 }
 
-// 4. Hata Durumu (Ekranda SnackBar ile hata mesajı göstereceğiz)
+/// Dosya sistemi, image picker veya database işlemi hata verdiğinde yayınlanır.
 class PhotoError extends PhotoState {
-  // Hata mesajını tutacak bir değişken
+  /// PhotoListPage'in SnackBar içinde göstereceği açıklama.
   final String message;
 
-  // Constructor
   PhotoError(this.message);
 }

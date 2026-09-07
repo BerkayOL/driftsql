@@ -6,7 +6,10 @@ import '../../data/dao/floor_dao.dart';
 import 'floor_state.dart';
 
 class FloorCubit extends Cubit<FloorState> {
+  /// Katlarla ilgili SQL/Drift işlemlerini yapan veri erişim katmanı.
   final FloorDao _floorDao;
+
+  /// Aktif bina için açılmış reactive sorgunun aboneliği.
   StreamSubscription<List<FloorWithBuilding>>? _floorsSubscription;
 
   FloorCubit(this._floorDao) : super(const FloorInitial());
@@ -39,6 +42,8 @@ class FloorCubit extends Cubit<FloorState> {
     required int floorNumber,
   }) async {
     try {
+      // Cubit yalnızca kullanıcıdan gelen veriyi DAO'ya iletir;
+      // tabloya nasıl INSERT yapılacağını bilmez.
       await _floorDao.insertFloor(
         buildingId: buildingId,
         name: name.trim(),
@@ -73,6 +78,8 @@ class FloorCubit extends Cubit<FloorState> {
     required double roomArea,
   }) async {
     try {
+      // DAO bu iki INSERT'i transaction içinde çalıştırır. Kat veya oda
+      // işlemlerinden biri başarısız olursa ikisi de geri alınır.
       await _floorDao.insertFloorWithFirstRoom(
         buildingId: buildingId,
         floorName: floorName.trim(),

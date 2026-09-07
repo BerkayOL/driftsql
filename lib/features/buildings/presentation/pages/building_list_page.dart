@@ -5,6 +5,9 @@ import '../../../floors/presentation/pages/floor_list_page.dart';
 import '../cubit/building_cubit.dart';
 import '../cubit/building_state.dart';
 
+/// Binaları listeleyen, ekleme/silme ve ülke-yıl filtresi sunan ana CRUD ekranı.
+///
+/// Drift sorgusu yazmaz; bütün işlemleri üstten sağlanan BuildingCubit'e iletir.
 class BuildingListPage extends StatefulWidget {
   const BuildingListPage({super.key});
 
@@ -47,6 +50,7 @@ class _BuildingListPageState extends State<BuildingListPage> {
       ),
 
       body: BlocConsumer<BuildingCubit, BuildingState>(
+        // listener yalnızca bir defalık yan etkiler (SnackBar gibi) içindir.
         listener: (context, state) {
           if (state is BuildingError) {
             ScaffoldMessenger.of(
@@ -55,6 +59,7 @@ class _BuildingListPageState extends State<BuildingListPage> {
           }
         },
 
+        // builder ise state değiştikçe ekrandaki kalıcı görünümü yeniden çizer.
         builder: (context, state) {
           if (state is BuildingInitial || state is BuildingLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -90,6 +95,8 @@ class _BuildingListPageState extends State<BuildingListPage> {
                               leading: const Icon(Icons.apartment),
 
                               onTap: () {
+                                // Seçilen binanın id'si sonraki sayfaya sorgu
+                                // anahtarı, adı ise başlık olarak taşınır.
                                 Navigator.of(context).push(
                                   MaterialPageRoute<void>(
                                     builder: (_) => FloorListPage(

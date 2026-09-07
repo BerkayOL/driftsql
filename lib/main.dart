@@ -9,6 +9,8 @@ import 'features/home/presentation/pages/home_page.dart';
 import 'features/photos/presentation/cubit/photo_cubit.dart';
 
 void main() {
+  // Database açılmadan önce Flutter'ın platform servislerini hazırlarız.
+  // path_provider ve SQLite gibi eklentiler bu bağlantıya ihtiyaç duyar.
   WidgetsFlutterBinding.ensureInitialized();
 
   /// Uygulamanın local SQLite database'ini oluşturuyoruz.
@@ -18,6 +20,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  /// Uygulama boyunca paylaşılacak tek database örneği.
+  /// Her sayfanın ayrı bağlantı açmasını önlemek için üst seviyede oluşturulur.
   final AppDatabase database;
 
   const MyApp({super.key, required this.database});
@@ -29,9 +33,11 @@ class MyApp extends StatelessWidget {
     ///
     /// Böylece provider'ları iç içe yazmamıza gerek kalmıyor.
     return RepositoryProvider.value(
+      // Alt sayfalar `context.read<AppDatabase>()` ile aynı örneğe ulaşabilir.
       value: database,
       child: MultiBlocProvider(
         providers: [
+          // Cubit'lere bütün database yerine yalnızca ihtiyaç duydukları DAO verilir.
           BlocProvider(create: (_) => BuildingCubit(database.buildingDao)),
           BlocProvider(create: (_) => FloorCubit(database.floorDao)),
           BlocProvider(create: (_) => PhotoCubit(database.photoDao)),

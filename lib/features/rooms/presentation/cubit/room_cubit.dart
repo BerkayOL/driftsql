@@ -6,18 +6,26 @@ import '../../data/dao/room_dao.dart';
 import 'room_state.dart';
 
 class RoomCubit extends Cubit<RoomState> {
+  /// Oda sorgularının UI katmanından ayrılmasını sağlayan DAO.
   final RoomDao _roomDao;
+
+  /// Şu anda görüntülenen kata ait JOIN sorgusunun aboneliği.
   StreamSubscription<List<RoomWithLocation>>? _subscription;
 
   RoomCubit(this._roomDao) : super(const RoomInitial());
 
   Future<void> watchRooms(int floorId) async {
+    // Önce yükleniyor durumu yayınlanır; sayfa progress indicator gösterir.
     emit(const RoomLoading());
+
+    // Farklı bir kata geçilmişse eski katın stream'ini dinlemeyi bırakırız.
     await _subscription?.cancel();
     _subscription = _roomDao
         .watchRoomsWithLocation(floorId: floorId)
         .listen(
           (rooms) {
+            // RoomWithLocation sayesinde UI oda ile beraber kat ve bina adını
+            // başka bir sorgu çalıştırmadan kullanabilir.
             if (!isClosed) {
               emit(RoomLoaded(rooms));
             }

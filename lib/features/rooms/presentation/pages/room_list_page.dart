@@ -7,6 +7,7 @@ import '../../../photos/presentation/pages/photo_list_page.dart';
 import '../cubit/room_cubit.dart';
 import '../cubit/room_state.dart';
 
+/// Seçilen kata ait odaları ve JOIN ile bulunan bina/kat konumunu gösterir.
 class RoomListPage extends StatefulWidget {
   final int floorId;
   final String floorName;
@@ -65,6 +66,8 @@ class _RoomListPageState extends State<RoomListPage> {
                   ),
                   isThreeLine: true,
                   onTap: () {
+                    // Bu sayfadan açılan galeri yalnızca seçilen roomId'ye bağlı
+                    // fotoğrafları izleyecek kendi PhotoCubit'ine sahiptir.
                     final database = context.read<AppDatabase>();
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -130,6 +133,8 @@ class _RoomListPageState extends State<RoomListPage> {
                 onChanged: (value) => setDialogState(() => isHeated = value),
               ),
               if (isHeated)
+                // Isıtılmayan odalarda hedef sıcaklık anlamsız olduğundan alanı
+                // gizler, kayıt sırasında database'e null göndeririz.
                 TextField(
                   controller: temperatureController,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -157,6 +162,8 @@ class _RoomListPageState extends State<RoomListPage> {
                         temperatureController.text.replaceAll(',', '.'),
                       )
                     : null;
+                // Virgüllü ondalık girişler üstte noktaya çevrilmiştir; burada
+                // zorunlu alanların gerçekten sayıya dönüşmesi kontrol edilir.
                 if (name.isEmpty ||
                     area == null ||
                     (isHeated && temperature == null)) {

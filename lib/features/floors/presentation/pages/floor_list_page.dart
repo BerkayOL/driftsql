@@ -7,6 +7,9 @@ import '../../../rooms/presentation/pages/room_list_page.dart';
 import '../cubit/floor_cubit.dart';
 import '../cubit/floor_state.dart';
 
+/// Tek bir binaya ait katları gösteren sayfa.
+///
+/// `buildingId` sorguyu sınırlar; `buildingName` yalnızca başlıkta gösterilir.
 class FloorListPage extends StatefulWidget {
   final int buildingId;
   final String buildingName;
@@ -64,6 +67,8 @@ class _FloorListPageState extends State<FloorListPage> {
                   // Bina adı Floor tablosundan değil, JOIN sonucundan gelir.
                   subtitle: Text('Bina: ${result.buildingName}'),
                   onTap: () {
+                    // RoomCubit global verilmediği için oda sayfasının yaşam
+                    // süresine bağlı yerel bir Cubit burada oluşturulur.
                     final database = context.read<AppDatabase>();
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(
@@ -166,12 +171,15 @@ class _FloorListPageState extends State<FloorListPage> {
                 }
 
                 if (firstRoom.isEmpty) {
+                  // İlk oda adı boşsa yalnızca FloorsTable'a kayıt eklenir.
                   context.read<FloorCubit>().addFloor(
                     buildingId: widget.buildingId,
                     name: name,
                     floorNumber: floorNumber,
                   );
                 } else {
+                  // İlk oda girildiyse iki kayıt DAO'da tek transaction içinde
+                  // oluşturulur; böylece yarım kayıt kalmaz.
                   context.read<FloorCubit>().addFloorWithFirstRoom(
                     buildingId: widget.buildingId,
                     floorName: name,

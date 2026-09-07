@@ -5,11 +5,14 @@ import '../../../../core/database/app_database.dart';
 import '../cubit/room_report_cubit.dart';
 import '../cubit/room_report_state.dart';
 
+/// SQL aggregate ve ilişkisel filtre sonuçlarını gösteren rapor sayfası.
 class RoomReportPage extends StatelessWidget {
   const RoomReportPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // RoomReportCubit yalnızca bu sayfa için oluşturulur. `..watch()` cascade
+    // sözdizimi constructor sonucunda hemen ilk sorguları başlatır.
     return BlocProvider(
       create: (_) =>
           RoomReportCubit(context.read<AppDatabase>().roomDao)..watch(),
@@ -42,6 +45,7 @@ class _RoomReportView extends StatelessWidget {
           if (state is RoomReportError) {
             return Center(child: Text(state.message));
           }
+          // Loading ve Error yukarıda elendiği için geriye yalnızca Loaded kalır.
           final loaded = state as RoomReportLoaded;
           final report = loaded.report;
           return ListView(
@@ -79,6 +83,7 @@ class _RoomReportView extends StatelessWidget {
   }
 
   Future<void> _showFilterDialog(BuildContext context) async {
+    // Dialog yeniden açıldığında son uygulanan değerleri kullanıcıya geri gösterir.
     final current = context.read<RoomReportCubit>().state;
     final countryController = TextEditingController(
       text: current is RoomReportLoaded ? current.countryCode : 'DE',

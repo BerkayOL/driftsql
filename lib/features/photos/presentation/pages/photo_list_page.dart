@@ -6,6 +6,9 @@ import 'package:image_picker/image_picker.dart';
 import '../cubit/photo_cubit.dart';
 import '../cubit/photo_state.dart';
 
+/// Tüm fotoğrafları veya `roomId` verilmişse tek odanın fotoğraflarını gösterir.
+///
+/// `roomId == null` olduğunda genel Fotoğraflar sekmesi olarak çalışır.
 class PhotoListPage extends StatefulWidget {
   final int? roomId;
   final String? roomName;
@@ -114,6 +117,8 @@ class _PhotoListPageState extends State<PhotoListPage> {
                     );
                   },
                   onLongPress: () {
+                    // Yanlışlıkla silmeyi azaltmak için işlem önce kullanıcıya
+                    // onaylatılır, ardından Cubit üzerinden gerçekleştirilir.
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
