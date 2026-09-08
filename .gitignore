@@ -24,3 +24,9 @@
 
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+
+# Unsupported Flutter platform targets
+/linux/
+/macos/
+/web/
+/windows/
