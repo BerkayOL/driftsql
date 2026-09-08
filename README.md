@@ -1,3 +1,9 @@
+## Development
+
+Tested with Flutter 3.44.8 (stable).
+
+Newer stable Flutter versions may also work.
+
 # Lidar Offline Storage PoC
 
 Bu proje, saha operasyonlarında internet bağlantısı olmadan yüksek boyutlu medya dosyalarının cihaz üzerinde saklanması ve yönetilmesi süreçlerini test etmek amacıyla geliştirilmiş bir Proof of Concept (PoC) çalışmasıdır.
