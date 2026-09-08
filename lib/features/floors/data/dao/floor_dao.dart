@@ -1,11 +1,16 @@
 import 'package:drift/drift.dart';
 
 import '../../../../core/database/app_database.dart';
-import '../../../buildings/data/buildings_table.dart';
-import '../../../rooms/data/rooms_table.dart';
-import '../floors_table.dart';
 
-part 'floor_dao.g.dart';
+import '../../../buildings/data/buildings_table.dart';
+
+import '../../../rooms/data/rooms_table.dart';
+import '../../../rooms/data/rooms_table.drift.dart';
+
+import '../floors_table.dart';
+import '../floors_table.drift.dart';
+
+import 'floor_dao.drift.dart';
 
 /// JOIN sonucundaki kat ve bağlı olduğu bina bilgisini type-safe taşır.
 final class FloorWithBuilding {
@@ -19,7 +24,7 @@ final class FloorWithBuilding {
 ///
 /// UI ve Cubit Drift sorgularını bilmez; yalnızca bu metotları kullanır.
 @DriftAccessor(tables: [FloorsTable, BuildingsTable, RoomsTable])
-class FloorDao extends DatabaseAccessor<AppDatabase> with _$FloorDaoMixin {
+class FloorDao extends DatabaseAccessor<AppDatabase> with $FloorDaoMixin {
   FloorDao(super.attachedDatabase);
 
   /// Bir binaya ait katları reactive olarak izler.

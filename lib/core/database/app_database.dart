@@ -10,13 +10,13 @@ import '../../features/photos/data/dao/photo_dao.dart';
 import '../../features/photos/data/offline_photos_table.dart';
 import '../../features/rooms/data/rooms_table.dart';
 
-part 'app_database.g.dart';
+import 'app_database.drift.dart';
 
 @DriftDatabase(
   tables: [OfflinePhotosTable, BuildingsTable, FloorsTable, RoomsTable],
   daos: [PhotoDao, BuildingDao, FloorDao, RoomDao],
 )
-final class AppDatabase extends _$AppDatabase {
+final class AppDatabase extends $AppDatabase {
   AppDatabase.defaults() : super(driftDatabase(name: 'app_database'));
 
   AppDatabase(super.e);

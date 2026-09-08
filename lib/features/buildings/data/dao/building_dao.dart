@@ -2,8 +2,8 @@ import 'package:drift/drift.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../buildings_table.dart';
-
-part 'building_dao.g.dart';
+import '../buildings_table.drift.dart';
+import 'building_dao.drift.dart';
 
 /// Binalarla ilgili local database işlemlerini yöneten DAO.
 ///
@@ -15,8 +15,7 @@ part 'building_dao.g.dart';
 ///
 /// Cubit veya UI doğrudan Drift sorgusu yazmaz.
 @DriftAccessor(tables: [BuildingsTable])
-class BuildingDao extends DatabaseAccessor<AppDatabase>
-    with _$BuildingDaoMixin {
+class BuildingDao extends DatabaseAccessor<AppDatabase> with $BuildingDaoMixin {
   /// Bu DAO'nun hangi AppDatabase üzerinde çalışacağını belirler.
   BuildingDao(super.attachedDatabase);
 
@@ -36,13 +35,6 @@ class BuildingDao extends DatabaseAccessor<AppDatabase>
   /// ID'si verilen tek bir binayı getirir.
   ///
   /// Bina bulunamazsa null döner.
-  ///
-  /// SQL karşılığı kabaca:
-  ///
-  /// SELECT *
-  /// FROM buildings_table
-  /// WHERE id = ?
-  /// LIMIT 1;
   Future<BuildingsTableData?> getBuildingById(int id) {
     return (select(
       buildingsTable,
@@ -50,9 +42,6 @@ class BuildingDao extends DatabaseAccessor<AppDatabase>
   }
 
   /// Yeni bina kaydı oluşturur.
-  ///
-  /// ID ve createdAt otomatik oluşturulduğu için
-  /// dışarıdan göndermemize gerek yok.
   Future<int> insertBuilding({
     required String name,
     required String countryCode,
@@ -74,14 +63,6 @@ class BuildingDao extends DatabaseAccessor<AppDatabase>
 
   /// Belirli bir ülkede bulunan ve verilen yıldan
   /// önce yapılmış binaları reactive olarak izler.
-  ///
-  /// Örnek:
-  ///
-  /// countryCode = 'DE'
-  /// builtBefore = 1990
-  ///
-  /// Sonuç:
-  /// Almanya'da 1990'dan önce yapılmış binalar.
   Stream<List<BuildingsTableData>> watchBuildingsByCountryAndYear({
     required String countryCode,
     required int builtBefore,

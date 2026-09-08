@@ -1,5 +1,4 @@
-import '../../../../core/database/app_database.dart';
-
+import '../../data/buildings_table.drift.dart';
 /// Building özelliğinde UI'ın bulunabileceği bütün durumların
 /// temel sınıfıdır.
 sealed class BuildingState {
