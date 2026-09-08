@@ -4,9 +4,17 @@ targets:
         drift_dev:
           # Default Drift generator test için kapatılıyor.
           enabled: false
-
+          options: &drift_options
+            databases:
+              app_database: lib/core/database/app_database.dart
+            
+            schema_dir: drift_schemas/
+            test_dir: test/drift/
+            
         drift_dev:analyzer:
           enabled: true
+          options: *drift_options
 
         drift_dev:modular:
           enabled: true 
+          options: *drift_options
