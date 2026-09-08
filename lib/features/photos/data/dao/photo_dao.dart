@@ -1,12 +1,20 @@
 import 'package:drift/drift.dart';
 
 import '../../../../core/database/app_database.dart';
-import '../../../buildings/data/buildings_table.dart';
-import '../../../floors/data/floors_table.dart';
-import '../../../rooms/data/rooms_table.dart';
-import '../offline_photos_table.dart';
 
-part 'photo_dao.g.dart';
+import '../../../buildings/data/buildings_table.dart';
+import '../../../buildings/data/buildings_table.drift.dart';
+
+import '../../../floors/data/floors_table.dart';
+import '../../../floors/data/floors_table.drift.dart';
+
+import '../../../rooms/data/rooms_table.dart';
+import '../../../rooms/data/rooms_table.drift.dart';
+
+import '../offline_photos_table.dart';
+import '../offline_photos_table.drift.dart';
+
+import 'photo_dao.drift.dart';
 
 /// Fotoğraf tablosuyla ilgili bütün veritabanı işlemlerini yöneten DAO.
 ///
@@ -33,7 +41,7 @@ final class PhotoWithLocation {
 @DriftAccessor(
   tables: [OfflinePhotosTable, RoomsTable, FloorsTable, BuildingsTable],
 )
-class PhotoDao extends DatabaseAccessor<AppDatabase> with _$PhotoDaoMixin {
+class PhotoDao extends DatabaseAccessor<AppDatabase> with $PhotoDaoMixin {
   /// DAO'nun hangi database üzerinde çalışacağını alıyoruz.
   PhotoDao(super.attachedDatabase);
 

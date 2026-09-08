@@ -3,9 +3,12 @@ import 'package:drift/drift.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../buildings/data/buildings_table.dart';
 import '../../../floors/data/floors_table.dart';
+import '../../../buildings/data/buildings_table.drift.dart';
+import '../../../floors/data/floors_table.drift.dart';
+import '../rooms_table.drift.dart';
 import '../rooms_table.dart';
 
-part 'room_dao.g.dart';
+import 'room_dao.drift.dart';
 
 /// JOIN sonucunda Room + Floor + Building bilgilerini
 /// type-safe şekilde tek nesnede taşımamızı sağlar.
@@ -45,7 +48,7 @@ final class RoomReport {
 /// - Bir kata ait odaları reactive olarak izler
 /// - Room + Floor + Building JOIN sorgusunu çalıştırır
 @DriftAccessor(tables: [RoomsTable, FloorsTable, BuildingsTable])
-class RoomDao extends DatabaseAccessor<AppDatabase> with _$RoomDaoMixin {
+class RoomDao extends DatabaseAccessor<AppDatabase> with $RoomDaoMixin {
   RoomDao(super.attachedDatabase);
 
   /// Belirli bir kata ait odaları reactive olarak izler.

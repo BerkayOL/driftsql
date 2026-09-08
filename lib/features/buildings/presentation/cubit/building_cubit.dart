@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/database/app_database.dart';
+import '../../data/buildings_table.drift.dart';
 import '../../data/dao/building_dao.dart';
 import 'building_state.dart';
 
