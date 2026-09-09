@@ -9,6 +9,8 @@ import '../../features/floors/data/floors_table.dart';
 import '../../features/photos/data/dao/photo_dao.dart';
 import '../../features/photos/data/offline_photos_table.dart';
 import '../../features/rooms/data/rooms_table.dart';
+import 'migrations/migration_context.dart';
+import 'migrations/migration_runner.dart';
 
 import 'app_database.drift.dart';
 
@@ -32,30 +34,17 @@ final class AppDatabase extends $AppDatabase {
       },
 
       onUpgrade: (Migrator m, int from, int to) async {
-        /// Version 2:
-        /// BuildingsTable eklendi.
-        if (from < 2) {
-          await m.createTable(buildingsTable);
-        }
-
-        /// Version 3:
-        /// FloorsTable eklendi.
-        if (from < 3) {
-          await m.createTable(floorsTable);
-        }
-
-        /// Version 4:
-        /// RoomsTable eklendi.
-        ///
-        /// RoomsTable, FloorsTable'a Foreign Key ile bağlıdır.
-        if (from < 4) {
-          await m.createTable(roomsTable);
-        }
-
-        /// Version 5: Mevcut fotoğrafları koruyan nullable Room foreign key'i.
-        if (from < 5) {
-          await m.addColumn(offlinePhotosTable, offlinePhotosTable.roomId);
-        }
+        await runMigrations(
+          migrator: m,
+          from: from,
+          to: to,
+          context: MigrationContext(
+            buildingsTable: buildingsTable,
+            floorsTable: floorsTable,
+            roomsTable: roomsTable,
+            offlinePhotosTable: offlinePhotosTable,
+          ),
+        );
       },
 
       beforeOpen: (details) async {
