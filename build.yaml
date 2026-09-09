@@ -18,4 +18,3 @@ targets:
       drift_dev:modular:
         enabled: true
         options: *drift_options
-          \ No newline at end of file
