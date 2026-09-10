@@ -110,7 +110,7 @@ class BuildingCubit extends Cubit<BuildingState> {
       // güncel listeyi otomatik yayınlayacak.
     } catch (e) {
       if (!isClosed) {
-        emit(BuildingError('Bina eklenirken hata oluştu: $e'));
+        _emitOperationError('Bina eklenirken hata oluştu: $e');
       }
     }
   }
@@ -124,8 +124,33 @@ class BuildingCubit extends Cubit<BuildingState> {
       // Drift .watch() DELETE işlemini fark edecek.
     } catch (e) {
       if (!isClosed) {
-        emit(BuildingError('Bina silinirken hata oluştu: $e'));
+        _emitOperationError('Bina silinirken hata oluştu: $e');
       }
+    }
+  }
+
+  /// Cubit'e operationError mesajı göndermek için küçük bir helper.
+  void _emitOperationError(String message) {
+    if (isClosed) {
+      return;
+    }
+
+    final currentState = state;
+
+    if (currentState is BuildingLoaded) {
+      emit(currentState.copyWith(operationError: message));
+    } else {
+      emit(BuildingError(message));
+    }
+  }
+
+  void clearOperationError() {
+    final currentState = state;
+
+    if (currentState is BuildingLoaded &&
+        currentState.operationError != null &&
+        !isClosed) {
+      emit(currentState.copyWith(clearOperationError: true));
     }
   }
 
