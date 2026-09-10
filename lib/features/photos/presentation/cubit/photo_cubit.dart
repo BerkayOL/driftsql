@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:driftsql/features/photos/data/dao/photo_dao.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
+import '../../data/services/photo_persistence_service.dart';
+import '../../data/services/photo_storage_service.dart';
 
 import 'photo_state.dart';
 
@@ -16,13 +15,26 @@ class PhotoCubit extends Cubit<PhotoState> {
   /// Kamera veya galeriyi açmak için kullanılır.
   final ImagePicker _picker = ImagePicker();
 
+  /// File System + SQLite arasında yapılan write işlemlerini koordine eder.
+  final PhotoPersistenceService _photoPersistenceService;
+
   /// Drift'in gönderdiği fotoğraf listesini dinlemek için kullanılır.
   ///
   /// Bu subscription sayesinde Cubit,
   /// database değişikliklerini sürekli takip edebilir.
   StreamSubscription<List<PhotoWithLocation>>? _photosSubscription;
 
-  PhotoCubit(this._photoDao) : super(PhotoInitial());
+  /// Cubit oluşturulurken DAO ve opsiyonel olarak persistence service verilir.
+  /// Eğer persistence service verilmezse Cubit kendi default instance'ını oluşturur.
+  PhotoCubit(PhotoDao photoDao, {PhotoPersistenceService? persistenceService})
+    : _photoDao = photoDao,
+      _photoPersistenceService =
+          persistenceService ??
+          PhotoPersistenceService(
+            photoDao: photoDao,
+            storageService: PhotoStorageService(),
+          ),
+      super(PhotoInitial());
 
   /// Fotoğraf tablosunu reactive olarak izlemeye başlar.
   ///
@@ -33,6 +45,8 @@ class PhotoCubit extends Cubit<PhotoState> {
   /// watchAllPhotos() ile tabloyu sürekli izliyoruz.
   Future<void> watchPhotos({int? roomId}) async {
     emit(PhotoLoading());
+
+    await _photoPersistenceService.retryPendingCleanups();
 
     // Bu metod birden fazla kez çağrılırsa
     // eski dinleyiciyi kapatıp yenisini oluşturuyoruz.
@@ -68,26 +82,14 @@ class PhotoCubit extends Cubit<PhotoState> {
 
       emit(PhotoLoading());
 
-      final directory = await getApplicationDocumentsDirectory();
-
-      final fileName = path.basename(pickedFile.path);
-
-      final savedImage = File(path.join(directory.path, fileName));
-
-      // ImagePicker'ın geçici dosyasını
-      // uygulamanın kalıcı klasörüne kopyalıyoruz.
-      await File(pickedFile.path).copy(savedImage.path);
-
-      // Database kaydını DAO oluşturuyor.
-      await _photoDao.insertPhoto(imagePath: savedImage.path, roomId: roomId);
-
-      // DİKKAT:
-      // Artık loadPhotos() çağırmıyoruz.
-      //
-      // INSERT gerçekleşince Drift'in .watch() sorgusu
-      // değişikliği otomatik algılayacak ve yeni listeyi yayınlayacak.
+      await _photoPersistenceService.savePhoto(
+        sourcePath: pickedFile.path,
+        roomId: roomId,
+      );
     } catch (e) {
-      emit(PhotoError('Fotoğraf kaydedilirken bir hata oluştu: $e'));
+      if (!isClosed) {
+        emit(PhotoError('Fotoğraf kaydedilirken bir hata oluştu: $e'));
+      }
     }
   }
 
@@ -96,20 +98,15 @@ class PhotoCubit extends Cubit<PhotoState> {
   Future<void> deletePhoto(PhotoWithLocation result) async {
     try {
       final photo = result.photo;
-      final file = File(photo.imagePath);
 
-      if (await file.exists()) {
-        await file.delete();
-      }
-
-      await _photoDao.deletePhotoById(photo.id);
-
-      // Artık burada da loadPhotos() yok.
-      //
-      // DELETE işlemi database'i değiştirdiği için
-      // .watch() otomatik olarak yeni liste yayınlayacak.
+      await _photoPersistenceService.deletePhoto(
+        photoId: photo.id,
+        imagePath: photo.imagePath,
+      );
     } catch (e) {
-      emit(PhotoError('Fotoğraf silinirken bir hata oluştu: $e'));
+      if (!isClosed) {
+        emit(PhotoError('Fotoğraf silinirken bir hata oluştu: $e'));
+      }
     }
   }
 

@@ -344,9 +344,119 @@ i1.GeneratedColumn<double> _column_13(String aliasedName) =>
       type: i1.DriftSqlType.double,
       $customConstraints: 'NOT NULL CHECK (area > 0.0)',
     );
+
+final class Schema8 extends i0.VersionedSchema {
+  Schema8({required super.database}) : super(version: 8);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    buildingsTable,
+    floorsTable,
+    roomsTable,
+    offlinePhotosTable,
+    pendingFileCleanupTable,
+    idxOfflinePhotosRoomCreatedAt,
+    idxFloorsBuildingFloorNumber,
+    idxRoomFloorName,
+  ];
+  late final Shape0 buildingsTable = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'buildings_table',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3, _column_4],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 floorsTable = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'floors_table',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_5, _column_1, _column_6, _column_4],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 roomsTable = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'rooms_table',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_7,
+        _column_1,
+        _column_8,
+        _column_9,
+        _column_13,
+        _column_4,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 offlinePhotosTable = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'offline_photos_table',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_11, _column_12, _column_4],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 pendingFileCleanupTable = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'pending_file_cleanup_table',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_14, _column_4],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxOfflinePhotosRoomCreatedAt = i1.Index(
+    'idx_offline_photos_room_created_at',
+    'CREATE INDEX idx_offline_photos_room_created_at ON offline_photos_table (room_id, created_at)',
+  );
+  final i1.Index idxFloorsBuildingFloorNumber = i1.Index(
+    'idx_floors_building_floor_number',
+    'CREATE UNIQUE INDEX idx_floors_building_floor_number ON floors_table (building_id, floor_number)',
+  );
+  final i1.Index idxRoomFloorName = i1.Index(
+    'idx_room_floor_name',
+    'CREATE INDEX idx_room_floor_name ON rooms_table (floor_id, name)',
+  );
+}
+
+class Shape4 extends i0.VersionedTable {
+  Shape4({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get filePath =>
+      columnsByName['file_path']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_14(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'file_path',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NOT NULL UNIQUE',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
   required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
+  required Future<void> Function(i1.Migrator m, Schema8 schema) from7To8,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -360,6 +470,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from6To7(migrator, schema);
         return 7;
+      case 7:
+        final schema = Schema8(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from7To8(migrator, schema);
+        return 8;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -369,6 +484,11 @@ i0.MigrationStepWithVersion migrationSteps({
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
   required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
+  required Future<void> Function(i1.Migrator m, Schema8 schema) from7To8,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from5To6: from5To6, from6To7: from6To7),
+  step: migrationSteps(
+    from5To6: from5To6,
+    from6To7: from6To7,
+    from7To8: from7To8,
+  ),
 );

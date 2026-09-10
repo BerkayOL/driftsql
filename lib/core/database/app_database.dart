@@ -11,11 +11,17 @@ import '../../features/photos/data/offline_photos_table.dart';
 import '../../features/rooms/data/rooms_table.dart';
 import 'migrations/migration_context.dart';
 import 'migrations/migration_runner.dart';
-
+import '../../features/photos/data/pending_file_cleanup_table.dart';
 import 'app_database.drift.dart';
 
 @DriftDatabase(
-  tables: [OfflinePhotosTable, BuildingsTable, FloorsTable, RoomsTable],
+  tables: [
+    OfflinePhotosTable,
+    BuildingsTable,
+    FloorsTable,
+    RoomsTable,
+    PendingFileCleanupTable,
+  ],
   daos: [PhotoDao, BuildingDao, FloorDao, RoomDao],
 )
 final class AppDatabase extends $AppDatabase {
@@ -24,7 +30,7 @@ final class AppDatabase extends $AppDatabase {
   AppDatabase(super.e);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration {

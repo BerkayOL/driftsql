@@ -28,6 +28,7 @@ Future<void> runMigrations({
       steps: migrationSteps(
         from5To6: migrateFrom5To6,
         from6To7: migrateFrom6To7,
+        from7To8: migrateFrom7To8,
       ),
     );
   }
