@@ -56,9 +56,17 @@ class _BuildingListPageState extends State<BuildingListPage> {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
+            return;
+          }
+
+          if (state is BuildingLoaded && state.operationError != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.operationError!)));
+
+            context.read<BuildingCubit>().clearOperationError();
           }
         },
-
         // builder ise state değiştikçe ekrandaki kalıcı görünümü yeniden çizer.
         builder: (context, state) {
           if (state is BuildingInitial || state is BuildingLoading) {

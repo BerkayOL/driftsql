@@ -28,10 +28,7 @@ class BuildingsTable extends Table {
   ///
   /// Tam ülke adını saklamak yerine kod kullanmak,
   /// ileride filtreleme ve standardizasyon açısından daha sağlıklıdır.
-  TextColumn get countryCode => text().withLength(
-        min: 2,
-        max: 2,
-      )();
+  TextColumn get countryCode => text().withLength(min: 2, max: 2)();
 
   /// Binanın yapım yılı.
   ///
@@ -40,6 +37,5 @@ class BuildingsTable extends Table {
   IntColumn get constructionYear => integer()();
 
   /// Kaydın local database'e ne zaman eklendiği.
-  DateTimeColumn get createdAt =>
-      dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
