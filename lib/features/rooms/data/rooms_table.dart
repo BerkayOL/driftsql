@@ -57,7 +57,8 @@ class RoomsTable extends Table {
   ///
   /// Örnek:
   /// 18.5 m²
-  RealColumn get area => real()();
+  late final Column<double> area =
+    real().check(area.isBiggerThanValue(0))();
 
   /// Kaydın local database'e ekleme zamanı.
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

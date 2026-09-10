@@ -25,7 +25,10 @@ Future<void> runMigrations({
     await migrator.runMigrationSteps(
       from: math.max(5, from),
       to: to,
-      steps: migrationSteps(from5To6: migrateFrom5To6),
+      steps: migrationSteps(
+        from5To6: migrateFrom5To6,
+        from6To7: migrateFrom6To7,
+      ),
     );
   }
   // Future ranges:

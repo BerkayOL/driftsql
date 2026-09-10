@@ -14,6 +14,7 @@ import '../../buildings/data/buildings_table.dart';
 @TableIndex(
   name: 'idx_floors_building_floor_number',
   columns: {#buildingId, #floorNumber},
+  unique: true,
 )
 class FloorsTable extends Table {
   /// Her katın benzersiz ID'si.

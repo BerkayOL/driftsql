@@ -466,6 +466,7 @@ class $RoomsTableTable extends i2.RoomsTable
     'area',
     aliasedName,
     false,
+    check: () => i3.ComparableExpr(area).isBiggerThanValue(0),
     type: i0.DriftSqlType.double,
     requiredDuringInsert: true,
   );

@@ -43,3 +43,17 @@ Future<void> migrateFrom5To6(Migrator migrator, Schema6 schema) async {
 
   await migrator.createIndex(schema.idxOfflinePhotosRoomCreatedAt);
 }
+
+/// v6 -> v7
+/// - floors(building_id, floor_number) index'i UNIQUE hale getirildi.
+/// - rooms.area için CHECK (area > 0) eklendi.
+Future<void> migrateFrom6To7(Migrator migrator, Schema7 schema) async {
+  // Rooms tablosu yeniden oluşturulur ve yeni CHECK constraint uygulanır.
+  await migrator.alterTable(TableMigration(schema.roomsTable));
+
+  // Aynı isimdeki normal index kaldırılır.
+  await migrator.drop(schema.idxFloorsBuildingFloorNumber);
+
+  // Aynı index UNIQUE olarak yeniden oluşturulur.
+  await migrator.createIndex(schema.idxFloorsBuildingFloorNumber);
+}
