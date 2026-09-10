@@ -348,6 +348,10 @@ typedef $$FloorsTableTableProcessedTableManager =
       i1.FloorsTableData,
       i0.PrefetchHooks Function({bool buildingId})
     >;
+i0.Index get idxFloorsBuildingFloorNumber => i0.Index(
+  'idx_floors_building_floor_number',
+  'CREATE INDEX idx_floors_building_floor_number ON floors_table (building_id, floor_number)',
+);
 
 class $FloorsTableTable extends i2.FloorsTable
     with i0.TableInfo<$FloorsTableTable, i1.FloorsTableData> {

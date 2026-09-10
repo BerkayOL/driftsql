@@ -1,4 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:drift/drift.dart';
+import 'package:driftsql/core/database/app_database.steps.dart';
 
 import 'migration_context.dart';
 import 'migrations_v001_v010.dart';
@@ -16,6 +19,15 @@ Future<void> runMigrations({
     context: context,
   );
 
+  // v5 ve sonrası:
+  // Drift'in generated step-by-step migration sistemi.
+  if (to > 5) {
+    await migrator.runMigrationSteps(
+      from: math.max(5, from),
+      to: to,
+      steps: migrationSteps(from5To6: migrateFrom5To6),
+    );
+  }
   // Future ranges:
   //
   // await runMigrationsV011V020(...);

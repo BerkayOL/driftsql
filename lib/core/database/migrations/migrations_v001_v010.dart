@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:driftsql/core/database/app_database.steps.dart';
 
 import 'migration_context.dart';
 
@@ -31,4 +32,14 @@ Future<void> runMigrationsV001V010({
       context.offlinePhotosTable.roomId,
     );
   }
+}
+
+/// v5 -> v6
+/// Sık kullanılan sorgular için composite index'ler eklendi.
+Future<void> migrateFrom5To6(Migrator migrator, Schema6 schema) async {
+  await migrator.createIndex(schema.idxFloorsBuildingFloorNumber);
+
+  await migrator.createIndex(schema.idxRoomFloorName);
+
+  await migrator.createIndex(schema.idxOfflinePhotosRoomCreatedAt);
 }

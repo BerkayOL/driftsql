@@ -38,6 +38,9 @@ abstract class $AppDatabase extends i0.GeneratedDatabase {
     floorsTable,
     roomsTable,
     offlinePhotosTable,
+    i4.idxOfflinePhotosRoomCreatedAt,
+    i2.idxFloorsBuildingFloorNumber,
+    i3.idxRoomFloorName,
   ];
   @override
   i0.StreamQueryUpdateRules get streamUpdateRules =>

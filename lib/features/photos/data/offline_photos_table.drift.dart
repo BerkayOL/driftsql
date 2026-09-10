@@ -337,6 +337,10 @@ typedef $$OfflinePhotosTableTableProcessedTableManager =
       i1.OfflinePhotosTableData,
       i0.PrefetchHooks Function({bool roomId})
     >;
+i0.Index get idxOfflinePhotosRoomCreatedAt => i0.Index(
+  'idx_offline_photos_room_created_at',
+  'CREATE INDEX idx_offline_photos_room_created_at ON offline_photos_table (room_id, created_at)',
+);
 
 class $OfflinePhotosTableTable extends i2.OfflinePhotosTable
     with i0.TableInfo<$OfflinePhotosTableTable, i1.OfflinePhotosTableData> {
