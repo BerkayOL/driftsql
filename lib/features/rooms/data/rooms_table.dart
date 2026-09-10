@@ -11,6 +11,7 @@ import '../../floors/data/floors_table.dart';
 /// Yani:
 /// - Bir katta birden fazla oda olabilir.
 /// - Her oda yalnızca bir kata aittir.
+@TableIndex(name: 'idx_room_floor_name', columns: {#floorId, #name})
 class RoomsTable extends Table {
   /// Odanın hangi kata ait olduğunu belirten Primary Key.
   IntColumn get id => integer().autoIncrement()();
@@ -42,7 +43,6 @@ class RoomsTable extends Table {
   /// Odanın ısıtılan bir alan olup olmadığını belirtir.
   BoolColumn get isHeated => boolean().withDefault(const Constant(true))();
 
-  
   /// Odanın hedef sıcaklığı.
   ///
   /// Örnek:
@@ -53,11 +53,10 @@ class RoomsTable extends Table {
   /// için nullable tanımlıyoruz.
   RealColumn get targetTemperature => real().nullable()();
 
-
   /// Odanın alanı, metrekare cinsinden.
   ///
   /// Örnek:
-  /// 18.5 m² 
+  /// 18.5 m²
   RealColumn get area => real()();
 
   /// Kaydın local database'e ekleme zamanı.

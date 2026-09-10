@@ -11,6 +11,10 @@ import '../../buildings/data/buildings_table.dart';
 /// Yani:
 /// - Bir binanın birden fazla katı olabilir.
 /// - Her kat yalnızca bir binaya aittir.
+@TableIndex(
+  name: 'idx_floors_building_floor_number',
+  columns: {#buildingId, #floorNumber},
+)
 class FloorsTable extends Table {
   /// Her katın benzersiz ID'si.
   IntColumn get id => integer().autoIncrement()();

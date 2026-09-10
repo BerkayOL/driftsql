@@ -2,6 +2,10 @@ import 'package:drift/drift.dart';
 
 import '../../rooms/data/rooms_table.dart';
 
+@TableIndex(
+  name: 'idx_offline_photos_room_created_at',
+  columns: {#roomId, #createdAt},
+)
 class OfflinePhotosTable extends Table {
   // 1. Benzersiz Kimlik (Primary Key)
   // Her Fotoğraf kaydının eşsiz bir Id'si olmalıdır. Otomatik artan (autoIncrement) yapıyoruz.
