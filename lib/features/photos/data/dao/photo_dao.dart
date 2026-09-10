@@ -14,6 +14,9 @@ import '../../../rooms/data/rooms_table.drift.dart';
 import '../offline_photos_table.dart';
 import '../offline_photos_table.drift.dart';
 
+import '../pending_file_cleanup_table.dart';
+import '../pending_file_cleanup_table.drift.dart';
+
 import 'photo_dao.drift.dart';
 
 /// Fotoğraf tablosuyla ilgili bütün veritabanı işlemlerini yöneten DAO.
@@ -39,7 +42,13 @@ final class PhotoWithLocation {
 }
 
 @DriftAccessor(
-  tables: [OfflinePhotosTable, RoomsTable, FloorsTable, BuildingsTable],
+  tables: [
+    OfflinePhotosTable,
+    RoomsTable,
+    FloorsTable,
+    BuildingsTable,
+    PendingFileCleanupTable,
+  ],
 )
 class PhotoDao extends DatabaseAccessor<AppDatabase> with $PhotoDaoMixin {
   /// DAO'nun hangi database üzerinde çalışacağını alıyoruz.
@@ -110,6 +119,48 @@ class PhotoDao extends DatabaseAccessor<AppDatabase> with $PhotoDaoMixin {
         roomId: Value(roomId),
       ),
     );
+  }
+
+  /// Fotoğraf kaydını siler ve fiziksel dosyanın cleanup işini
+  /// aynı SQLite transaction içerisinde oluşturur.
+  Future<int> deletePhotoAndQueueCleanup({
+    required int photoId,
+    required String imagePath,
+  }) {
+    return transaction(() async {
+      final deletedRows = await (delete(
+        offlinePhotosTable,
+      )..where((table) => table.id.equals(photoId))).go();
+
+      if (deletedRows == 0) {
+        return 0;
+      }
+
+      await into(pendingFileCleanupTable).insert(
+        PendingFileCleanupTableCompanion.insert(filePath: imagePath),
+        mode: InsertMode.insertOrIgnore,
+      );
+
+      return deletedRows;
+    });
+  }
+
+  /// Bekleyen fiziksel dosya cleanup işlerini getirir.
+  Future<List<PendingFileCleanupTableData>> getPendingFileCleanups() {
+    return select(pendingFileCleanupTable).get();
+  }
+
+  /// Başarıyla tamamlanan cleanup işini kuyruktan kaldırır.
+  Future<int> deletePendingFileCleanupById(int id) {
+    return (delete(
+      pendingFileCleanupTable,
+    )..where((table) => table.id.equals(id))).go();
+  }
+
+  Future<int> deletePendingFileCleanupByPath(String filePath) {
+    return (delete(
+      pendingFileCleanupTable,
+    )..where((table) => table.filePath.equals(filePath))).go();
   }
 
   /// Verilen ID'ye sahip fotoğraf kaydını siler.

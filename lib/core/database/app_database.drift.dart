@@ -7,11 +7,13 @@ import 'package:driftsql/features/floors/data/floors_table.drift.dart' as i2;
 import 'package:driftsql/features/rooms/data/rooms_table.drift.dart' as i3;
 import 'package:driftsql/features/photos/data/offline_photos_table.drift.dart'
     as i4;
-import 'package:driftsql/features/photos/data/dao/photo_dao.dart' as i5;
-import 'package:driftsql/core/database/app_database.dart' as i6;
-import 'package:driftsql/features/buildings/data/dao/building_dao.dart' as i7;
-import 'package:driftsql/features/floors/data/dao/floor_dao.dart' as i8;
-import 'package:driftsql/features/rooms/data/dao/room_dao.dart' as i9;
+import 'package:driftsql/features/photos/data/pending_file_cleanup_table.drift.dart'
+    as i5;
+import 'package:driftsql/features/photos/data/dao/photo_dao.dart' as i6;
+import 'package:driftsql/core/database/app_database.dart' as i7;
+import 'package:driftsql/features/buildings/data/dao/building_dao.dart' as i8;
+import 'package:driftsql/features/floors/data/dao/floor_dao.dart' as i9;
+import 'package:driftsql/features/rooms/data/dao/room_dao.dart' as i10;
 
 abstract class $AppDatabase extends i0.GeneratedDatabase {
   $AppDatabase(i0.QueryExecutor e) : super(e);
@@ -23,12 +25,14 @@ abstract class $AppDatabase extends i0.GeneratedDatabase {
   late final i3.$RoomsTableTable roomsTable = i3.$RoomsTableTable(this);
   late final i4.$OfflinePhotosTableTable offlinePhotosTable = i4
       .$OfflinePhotosTableTable(this);
-  late final i5.PhotoDao photoDao = i5.PhotoDao(this as i6.AppDatabase);
-  late final i7.BuildingDao buildingDao = i7.BuildingDao(
-    this as i6.AppDatabase,
+  late final i5.$PendingFileCleanupTableTable pendingFileCleanupTable = i5
+      .$PendingFileCleanupTableTable(this);
+  late final i6.PhotoDao photoDao = i6.PhotoDao(this as i7.AppDatabase);
+  late final i8.BuildingDao buildingDao = i8.BuildingDao(
+    this as i7.AppDatabase,
   );
-  late final i8.FloorDao floorDao = i8.FloorDao(this as i6.AppDatabase);
-  late final i9.RoomDao roomDao = i9.RoomDao(this as i6.AppDatabase);
+  late final i9.FloorDao floorDao = i9.FloorDao(this as i7.AppDatabase);
+  late final i10.RoomDao roomDao = i10.RoomDao(this as i7.AppDatabase);
   @override
   Iterable<i0.TableInfo<i0.Table, Object?>> get allTables =>
       allSchemaEntities.whereType<i0.TableInfo<i0.Table, Object?>>();
@@ -38,6 +42,7 @@ abstract class $AppDatabase extends i0.GeneratedDatabase {
     floorsTable,
     roomsTable,
     offlinePhotosTable,
+    pendingFileCleanupTable,
     i4.idxOfflinePhotosRoomCreatedAt,
     i2.idxFloorsBuildingFloorNumber,
     i3.idxRoomFloorName,
@@ -82,4 +87,9 @@ class $AppDatabaseManager {
       i3.$$RoomsTableTableTableManager(_db, _db.roomsTable);
   i4.$$OfflinePhotosTableTableTableManager get offlinePhotosTable =>
       i4.$$OfflinePhotosTableTableTableManager(_db, _db.offlinePhotosTable);
+  i5.$$PendingFileCleanupTableTableTableManager get pendingFileCleanupTable =>
+      i5.$$PendingFileCleanupTableTableTableManager(
+        _db,
+        _db.pendingFileCleanupTable,
+      );
 }

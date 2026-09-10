@@ -57,3 +57,7 @@ Future<void> migrateFrom6To7(Migrator migrator, Schema7 schema) async {
   // Aynı index UNIQUE olarak yeniden oluşturulur.
   await migrator.createIndex(schema.idxFloorsBuildingFloorNumber);
 }
+
+Future<void> migrateFrom7To8(Migrator migrator, Schema8 schema) async {
+  await migrator.createTable(schema.pendingFileCleanupTable);
+}

@@ -9,6 +9,8 @@ import 'package:driftsql/features/floors/data/floors_table.drift.dart' as i4;
 import 'package:driftsql/features/rooms/data/rooms_table.drift.dart' as i5;
 import 'package:driftsql/features/photos/data/offline_photos_table.drift.dart'
     as i6;
+import 'package:driftsql/features/photos/data/pending_file_cleanup_table.drift.dart'
+    as i7;
 
 mixin $PhotoDaoMixin on i0.DatabaseAccessor<i1.AppDatabase> {
   i2.$BuildingsTableTable get buildingsTable => i3.ReadDatabaseContainer(
@@ -24,6 +26,12 @@ mixin $PhotoDaoMixin on i0.DatabaseAccessor<i1.AppDatabase> {
       i3.ReadDatabaseContainer(
         attachedDatabase,
       ).resultSet<i6.$OfflinePhotosTableTable>('offline_photos_table');
+  i7.$PendingFileCleanupTableTable get pendingFileCleanupTable =>
+      i3.ReadDatabaseContainer(
+        attachedDatabase,
+      ).resultSet<i7.$PendingFileCleanupTableTable>(
+        'pending_file_cleanup_table',
+      );
   PhotoDaoManager get managers => PhotoDaoManager(this);
 }
 
@@ -43,5 +51,10 @@ class PhotoDaoManager {
       i6.$$OfflinePhotosTableTableTableManager(
         _db.attachedDatabase,
         _db.offlinePhotosTable,
+      );
+  i7.$$PendingFileCleanupTableTableTableManager get pendingFileCleanupTable =>
+      i7.$$PendingFileCleanupTableTableTableManager(
+        _db.attachedDatabase,
+        _db.pendingFileCleanupTable,
       );
 }
