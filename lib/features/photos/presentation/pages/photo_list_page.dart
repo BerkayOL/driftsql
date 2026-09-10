@@ -20,11 +20,38 @@ class PhotoListPage extends StatefulWidget {
 }
 
 class _PhotoListPageState extends State<PhotoListPage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
-    // Ekran açıldığında fotoğrafları yükle
-    context.read<PhotoCubit>().watchPhotos(roomId: widget.roomId);
+
+    _scrollController.addListener(_onScroll);
+
+    context.read<PhotoCubit>().loadInitialPage(roomId: widget.roomId);
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) {
+      return;
+    }
+
+    final position = _scrollController.position;
+
+    // Listenin sonuna yaklaşık 500px kala
+    // sonraki sayfayı önceden yüklemeye başlarız.
+    if (position.pixels >= position.maxScrollExtent - 500) {
+      context.read<PhotoCubit>().loadMore();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+
+    super.dispose();
   }
 
   @override
@@ -40,7 +67,6 @@ class _PhotoListPageState extends State<PhotoListPage> {
       // BlocConsumer, hem state'i dinler hem de UI'yi günceller.
       body: BlocConsumer<PhotoCubit, PhotoState>(
         listener: (context, state) {
-          // Eğer state PhotoError ise, ekranda bir SnackBar göster
           if (state is PhotoError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -48,6 +74,10 @@ class _PhotoListPageState extends State<PhotoListPage> {
                 backgroundColor: Colors.red,
               ),
             );
+          } else if (state is PhotoLoaded && state.operationError != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.operationError!)));
           }
         },
         builder: (context, state) {
@@ -63,14 +93,24 @@ class _PhotoListPageState extends State<PhotoListPage> {
 
             // Fotoğrafları 2'li kutular halinde diziyoruz.
             return GridView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.all(8),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2, // yan yana 2 fotoğraf
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
               ),
-              itemCount: state.photos.length,
+              itemCount: state.photos.length + (state.isLoadingMore ? 1 : 0),
               itemBuilder: (context, index) {
+                if (index >= state.photos.length) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
                 final result = state.photos[index];
                 final photo = result.photo;
 
@@ -153,7 +193,32 @@ class _PhotoListPageState extends State<PhotoListPage> {
                       fit: StackFit.expand,
                       children: [
                         // Arka planda fotoğraf
-                        Image.file(File(photo.imagePath), fit: BoxFit.cover),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final devicePixelRatio =
+                                MediaQuery.devicePixelRatioOf(context);
+
+                            final targetWidth =
+                                (constraints.maxWidth * devicePixelRatio)
+                                    .round()
+                                    .clamp(1, 1024)
+                                    .toInt();
+
+                            return Image.file(
+                              File(photo.imagePath),
+                              fit: BoxFit.cover,
+
+                              // Grid için yalnızca ihtiyaç duyulan çözünürlükte decode edilir.
+                              cacheWidth: targetWidth,
+
+                              errorBuilder: (context, error, stackTrace) {
+                                return const Center(
+                                  child: Icon(Icons.broken_image_outlined),
+                                );
+                              },
+                            );
+                          },
+                        ),
                         Positioned(
                           bottom: 0,
                           left: 0,

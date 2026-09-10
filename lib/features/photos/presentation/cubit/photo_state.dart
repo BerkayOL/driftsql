@@ -12,10 +12,34 @@ class PhotoLoading extends PhotoState {}
 
 /// Fotoğraflar, varsa oda/kat/bina bilgileriyle birlikte başarıyla geldi.
 class PhotoLoaded extends PhotoState {
-  /// Bu liste yalnızca fotoğrafı değil, LEFT JOIN ile bulunan konumunu da taşır.
   final List<PhotoWithLocation> photos;
+  final bool hasMore;
+  final bool isLoadingMore;
+  final String? operationError;
 
-  PhotoLoaded(this.photos);
+  PhotoLoaded(
+    this.photos, {
+    required this.hasMore,
+    this.isLoadingMore = false,
+    this.operationError,
+  });
+
+  PhotoLoaded copyWith({
+    List<PhotoWithLocation>? photos,
+    bool? hasMore,
+    bool? isLoadingMore,
+    String? operationError,
+    bool clearOperationError = false,
+  }) {
+    return PhotoLoaded(
+      photos ?? this.photos,
+      hasMore: hasMore ?? this.hasMore,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      operationError: clearOperationError
+          ? null
+          : operationError ?? this.operationError,
+    );
+  }
 }
 
 /// Dosya sistemi, image picker veya database işlemi hata verdiğinde yayınlanır.

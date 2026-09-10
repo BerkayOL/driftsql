@@ -2,6 +2,8 @@ import 'package:drift/drift.dart';
 
 import '../../../../core/database/app_database.dart';
 
+import '../models/photo_page.dart';
+
 import '../../../buildings/data/buildings_table.dart';
 import '../../../buildings/data/buildings_table.drift.dart';
 
@@ -161,6 +163,72 @@ class PhotoDao extends DatabaseAccessor<AppDatabase> with $PhotoDaoMixin {
     return (delete(
       pendingFileCleanupTable,
     )..where((table) => table.filePath.equals(filePath))).go();
+  }
+
+  Future<PhotoPage> getPhotosPage({
+    int? roomId,
+    PhotoCursor? cursor,
+    int pageSize = 30,
+  }) async {
+    final query = select(offlinePhotosTable).join([
+      leftOuterJoin(
+        roomsTable,
+        roomsTable.id.equalsExp(offlinePhotosTable.roomId),
+      ),
+      leftOuterJoin(floorsTable, floorsTable.id.equalsExp(roomsTable.floorId)),
+      leftOuterJoin(
+        buildingsTable,
+        buildingsTable.id.equalsExp(floorsTable.buildingId),
+      ),
+    ]);
+
+    if (roomId != null) {
+      query.where(offlinePhotosTable.roomId.equals(roomId));
+    }
+
+    if (cursor != null) {
+      query.where(
+        offlinePhotosTable.createdAt.isSmallerThanValue(cursor.createdAt) |
+            (offlinePhotosTable.createdAt.equals(cursor.createdAt) &
+                offlinePhotosTable.id.isSmallerThanValue(cursor.id)),
+      );
+    }
+
+    query.orderBy([
+      OrderingTerm.desc(offlinePhotosTable.createdAt),
+      OrderingTerm.desc(offlinePhotosTable.id),
+    ]);
+
+    // Bir fazla kayıt çekiyoruz.
+    // Böylece gerçekten devam eden başka sayfa var mı anlayabiliyoruz.
+    query.limit(pageSize + 1);
+
+    final rows = await query.get();
+
+    final hasMore = rows.length > pageSize;
+
+    final visibleRows = hasMore ? rows.take(pageSize).toList() : rows;
+
+    final items = visibleRows
+        .map(
+          (row) => PhotoWithLocation(
+            photo: row.readTable(offlinePhotosTable),
+            room: row.readTableOrNull(roomsTable),
+            floor: row.readTableOrNull(floorsTable),
+            building: row.readTableOrNull(buildingsTable),
+          ),
+        )
+        .toList();
+
+    final lastPhoto = items.isEmpty ? null : items.last.photo;
+
+    return PhotoPage(
+      items: items,
+      hasMore: hasMore,
+      nextCursor: lastPhoto == null
+          ? null
+          : PhotoCursor(createdAt: lastPhoto.createdAt, id: lastPhoto.id),
+    );
   }
 
   /// Verilen ID'ye sahip fotoğraf kaydını siler.
