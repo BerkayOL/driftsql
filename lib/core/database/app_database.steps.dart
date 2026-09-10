@@ -257,8 +257,96 @@ i1.GeneratedColumn<int> _column_12(String aliasedName) =>
       type: i1.DriftSqlType.int,
       $customConstraints: 'NULL REFERENCES rooms_table(id)ON DELETE SET NULL',
     );
+
+final class Schema7 extends i0.VersionedSchema {
+  Schema7({required super.database}) : super(version: 7);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    buildingsTable,
+    floorsTable,
+    roomsTable,
+    offlinePhotosTable,
+    idxOfflinePhotosRoomCreatedAt,
+    idxFloorsBuildingFloorNumber,
+    idxRoomFloorName,
+  ];
+  late final Shape0 buildingsTable = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'buildings_table',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3, _column_4],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 floorsTable = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'floors_table',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_5, _column_1, _column_6, _column_4],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 roomsTable = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'rooms_table',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_7,
+        _column_1,
+        _column_8,
+        _column_9,
+        _column_13,
+        _column_4,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 offlinePhotosTable = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'offline_photos_table',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_11, _column_12, _column_4],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxOfflinePhotosRoomCreatedAt = i1.Index(
+    'idx_offline_photos_room_created_at',
+    'CREATE INDEX idx_offline_photos_room_created_at ON offline_photos_table (room_id, created_at)',
+  );
+  final i1.Index idxFloorsBuildingFloorNumber = i1.Index(
+    'idx_floors_building_floor_number',
+    'CREATE UNIQUE INDEX idx_floors_building_floor_number ON floors_table (building_id, floor_number)',
+  );
+  final i1.Index idxRoomFloorName = i1.Index(
+    'idx_room_floor_name',
+    'CREATE INDEX idx_room_floor_name ON rooms_table (floor_id, name)',
+  );
+}
+
+i1.GeneratedColumn<double> _column_13(String aliasedName) =>
+    i1.GeneratedColumn<double>(
+      'area',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.double,
+      $customConstraints: 'NOT NULL CHECK (area > 0.0)',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
+  required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -267,6 +355,11 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from5To6(migrator, schema);
         return 6;
+      case 6:
+        final schema = Schema7(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from6To7(migrator, schema);
+        return 7;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -275,6 +368,7 @@ i0.MigrationStepWithVersion migrationSteps({
 
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema6 schema) from5To6,
+  required Future<void> Function(i1.Migrator m, Schema7 schema) from6To7,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from5To6: from5To6),
+  step: migrationSteps(from5To6: from5To6, from6To7: from6To7),
 );
