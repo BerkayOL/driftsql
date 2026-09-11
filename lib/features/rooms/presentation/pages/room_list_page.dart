@@ -67,7 +67,7 @@ class _RoomListPageState extends State<RoomListPage> {
                   isThreeLine: true,
                   onTap: () {
                     // Bu sayfadan açılan galeri yalnızca seçilen roomId'ye bağlı
-                    // fotoğrafları izleyecek kendi PhotoCubit'ine sahiptir.
+                    // fotoğrafları sayfalayan kendi PhotoCubit'ine sahiptir.
                     final database = context.read<AppDatabase>();
                     Navigator.of(context).push(
                       MaterialPageRoute<void>(

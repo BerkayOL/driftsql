@@ -39,7 +39,6 @@ final class TestPhotoDao extends PhotoDao {
   }
 }
 
-// main, TestPhotoDao sınıfının DIŞINDA olmalı.
 void main() {
   late AppDatabase database;
   late TestPhotoDao photoDao;
