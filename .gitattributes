@@ -1,0 +1,6 @@
+# Drift schema snapshots and generated migration artifacts
+# must use deterministic LF line endings.
+drift_schemas/**/*.json text eol=lf
+test/drift/**/*.dart text eol=lf
+lib/**/*.drift.dart text eol=lf
+lib/core/database/app_database.steps.dart text eol=lf

@@ -74,19 +74,49 @@ class _PhotoListPageState extends State<PhotoListPage> {
                 backgroundColor: Colors.red,
               ),
             );
-          } else if (state is PhotoLoaded && state.operationError != null) {
+
+            return;
+          }
+
+          if (state is PhotoLoaded && state.operationError != null) {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.operationError!)));
+
+            context.read<PhotoCubit>().clearOperationError();
           }
         },
         builder: (context, state) {
-          // Eğer durum Başlangıç veya Yükleniyor ise, ekranda bir yükleniyor göstergesi göster
           if (state is PhotoInitial || state is PhotoLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          // Eğer durum Fotoğraflar Yüklendi ise, ekranda fotoğrafları listele
-          else if (state is PhotoLoaded) {
+
+          if (state is PhotoError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.error_outline, size: 48),
+                    const SizedBox(height: 12),
+                    Text(state.message, textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    FilledButton(
+                      onPressed: () {
+                        context.read<PhotoCubit>().loadInitialPage(
+                          roomId: widget.roomId,
+                        );
+                      },
+                      child: const Text('Tekrar Dene'),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          if (state is PhotoLoaded) {
             if (state.photos.isEmpty) {
               return const Center(child: Text('Henüz fotoğraf yok.'));
             }
@@ -248,7 +278,7 @@ class _PhotoListPageState extends State<PhotoListPage> {
               },
             );
           }
-          // Hiçbir duruma uymuyorsa boş bir alan döndür.
+          // Tanımlı state'lerin dışında güvenli fallback.
           return const SizedBox.shrink();
         },
       ),
