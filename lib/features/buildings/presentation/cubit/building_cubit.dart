@@ -2,22 +2,22 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../data/buildings_table.drift.dart';
-import '../../data/dao/building_dao.dart';
+import '../../domain/models/building.dart';
+import '../../domain/repositories/building_repository.dart';
 import 'building_state.dart';
 
 class BuildingCubit extends Cubit<BuildingState> {
-  /// Database sorguları doğrudan Cubit içerisinde yazılmaz.
-  /// BuildingDao bu sorumluluğu üstlenir.
-  final BuildingDao _buildingDao;
+  /// Cubit doğrudan database veya DAO ile konuşmaz.
+  /// BuildingRepository bu sorumluluğu presentation katmanından soyutlar.
+  final BuildingRepository _repository;
 
   /// Drift'in reactive Stream'ini dinlediğimiz subscription.
   ///
   /// Filtre değiştiğinde eski sorguyu bırakıp
   /// yeni sorguyu dinlememizi sağlar.
-  StreamSubscription<List<BuildingsTableData>>? _buildingsSubscription;
+  StreamSubscription<List<Building>>? _buildingsSubscription;
 
-  BuildingCubit(this._buildingDao) : super(const BuildingInitial());
+  BuildingCubit(this._repository) : super(const BuildingInitial());
 
   /// Bütün binaları reactive olarak izlemeye başlar.
   Future<void> watchAllBuildings() async {
@@ -26,7 +26,7 @@ class BuildingCubit extends Cubit<BuildingState> {
     // Daha önce başka bir bina sorgusu dinleniyorsa kapatıyoruz.
     await _buildingsSubscription?.cancel();
 
-    _buildingsSubscription = _buildingDao.watchAllBuildings().listen(
+    _buildingsSubscription = _repository.watchAllBuildings().listen(
       (buildings) {
         if (!isClosed) {
           emit(BuildingLoaded(buildings));
@@ -61,7 +61,7 @@ class BuildingCubit extends Cubit<BuildingState> {
     // standart "DE" formatına dönüştürüyoruz.
     final normalizedCountryCode = countryCode.trim().toUpperCase();
 
-    _buildingsSubscription = _buildingDao
+    _buildingsSubscription = _repository
         .watchBuildingsByCountryAndYear(
           countryCode: normalizedCountryCode,
           builtBefore: builtBefore,
@@ -98,7 +98,7 @@ class BuildingCubit extends Cubit<BuildingState> {
     required int constructionYear,
   }) async {
     try {
-      await _buildingDao.insertBuilding(
+      await _repository.addBuilding(
         name: name.trim(),
         countryCode: countryCode.trim().toUpperCase(),
         constructionYear: constructionYear,
@@ -118,7 +118,7 @@ class BuildingCubit extends Cubit<BuildingState> {
   /// ID'si verilen binayı database'den siler.
   Future<void> deleteBuilding(int id) async {
     try {
-      await _buildingDao.deleteBuildingById(id);
+      await _repository.deleteBuildingById(id);
 
       // Burada da manuel reload yok.
       // Drift .watch() DELETE işlemini fark edecek.

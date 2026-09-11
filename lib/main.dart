@@ -8,6 +8,9 @@ import 'features/floors/presentation/cubit/floor_cubit.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/photos/presentation/cubit/photo_cubit.dart';
 
+import 'features/buildings/data/repositories/building_repository_impl.dart';
+import 'features/buildings/domain/repositories/building_repository.dart';
+
 void main() {
   // Database açılmadan önce Flutter'ın platform servislerini hazırlarız.
   // path_provider ve SQLite gibi eklentiler bu bağlantıya ihtiyaç duyar.
@@ -28,17 +31,20 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    /// Uygulamada artık birden fazla Cubit olduğu için
-    /// MultiBlocProvider kullanıyoruz.
-    ///
-    /// Böylece provider'ları iç içe yazmamıza gerek kalmıyor.
-    return RepositoryProvider.value(
-      // Alt sayfalar `context.read<AppDatabase>()` ile aynı örneğe ulaşabilir.
-      value: database,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AppDatabase>.value(value: database),
+
+        RepositoryProvider<BuildingRepository>(
+          create: (_) => BuildingRepositoryImpl(database.buildingDao),
+        ),
+      ],
       child: MultiBlocProvider(
         providers: [
-          // Cubit'lere bütün database yerine yalnızca ihtiyaç duydukları DAO verilir.
-          BlocProvider(create: (_) => BuildingCubit(database.buildingDao)),
+          BlocProvider(
+            create: (context) =>
+                BuildingCubit(context.read<BuildingRepository>()),
+          ),
           BlocProvider(create: (_) => FloorCubit(database.floorDao)),
           BlocProvider(create: (_) => PhotoCubit(database.photoDao)),
         ],

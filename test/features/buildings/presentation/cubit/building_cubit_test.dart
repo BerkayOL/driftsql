@@ -1,74 +1,101 @@
-import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:driftsql/core/database/app_database.dart';
-import 'package:driftsql/features/buildings/data/buildings_table.drift.dart';
-import 'package:driftsql/features/buildings/data/dao/building_dao.dart';
+import 'package:driftsql/features/buildings/domain/models/building.dart';
+import 'package:driftsql/features/buildings/domain/repositories/building_repository.dart';
 import 'package:driftsql/features/buildings/presentation/cubit/building_cubit.dart';
 import 'package:driftsql/features/buildings/presentation/cubit/building_state.dart';
 
-/// Gerçek BuildingDao'yu kullanır.
-/// Sadece test etmek istediğimiz hata durumlarını kontrollü şekilde üretir.
-final class TestBuildingDao extends BuildingDao {
-  TestBuildingDao(super.database);
-
-  bool failInsert = false;
+final class TestBuildingRepository implements BuildingRepository {
+  bool failAdd = false;
   bool failWatch = false;
 
+  final List<Building> _buildings = [
+    Building(
+      id: 1,
+      name: 'Existing Building',
+      countryCode: 'TR',
+      constructionYear: 2020,
+      createdAt: DateTime(2020),
+    ),
+  ];
+
   @override
-  Future<int> insertBuilding({
+  Stream<List<Building>> watchAllBuildings() {
+    if (failWatch) {
+      return Stream<List<Building>>.error(StateError('Test watch failure'));
+    }
+
+    return Stream.value(List<Building>.unmodifiable(_buildings));
+  }
+
+  @override
+  Stream<List<Building>> watchBuildingsByCountryAndYear({
+    required String countryCode,
+    required int builtBefore,
+  }) {
+    final filtered = _buildings
+        .where(
+          (building) =>
+              building.countryCode == countryCode &&
+              building.constructionYear < builtBefore,
+        )
+        .toList();
+
+    return Stream.value(filtered);
+  }
+
+  @override
+  Future<Building?> getBuildingById(int id) async {
+    for (final building in _buildings) {
+      if (building.id == id) {
+        return building;
+      }
+    }
+
+    return null;
+  }
+
+  @override
+  Future<void> addBuilding({
     required String name,
     required String countryCode,
     required int constructionYear,
-  }) {
-    if (failInsert) {
-      return Future<int>.error(StateError('Test insert failure'));
+  }) async {
+    if (failAdd) {
+      throw StateError('Test insert failure');
     }
 
-    return super.insertBuilding(
-      name: name,
-      countryCode: countryCode,
-      constructionYear: constructionYear,
+    _buildings.add(
+      Building(
+        id: _buildings.length + 1,
+        name: name,
+        countryCode: countryCode,
+        constructionYear: constructionYear,
+        createdAt: DateTime.now(),
+      ),
     );
   }
 
   @override
-  Stream<List<BuildingsTableData>> watchAllBuildings() {
-    if (failWatch) {
-      return Stream<List<BuildingsTableData>>.error(
-        StateError('Test watch failure'),
-      );
-    }
-
-    return super.watchAllBuildings();
+  Future<void> deleteBuildingById(int id) async {
+    _buildings.removeWhere((building) => building.id == id);
   }
 }
 
 void main() {
-  late AppDatabase database;
-  late TestBuildingDao buildingDao;
+  late TestBuildingRepository repository;
   late BuildingCubit cubit;
 
   setUp(() {
-    database = AppDatabase(NativeDatabase.memory());
-    buildingDao = TestBuildingDao(database);
-    cubit = BuildingCubit(buildingDao);
+    repository = TestBuildingRepository();
+    cubit = BuildingCubit(repository);
   });
 
   tearDown(() async {
     await cubit.close();
-    await database.close();
   });
 
   test('insert failure keeps existing loaded buildings', () async {
-    // Önce database'e geçerli bir bina ekliyoruz.
-    await database.buildingDao.insertBuilding(
-      name: 'Existing Building',
-      countryCode: 'TR',
-      constructionYear: 2020,
-    );
-
-    // Cubit'in BuildingLoaded state'ine geçmesini bekliyoruz.
     final loadedFuture = cubit.stream.firstWhere(
       (state) => state is BuildingLoaded,
     );
@@ -79,8 +106,7 @@ void main() {
 
     expect(initialLoaded.buildings, hasLength(1));
 
-    // Bundan sonraki INSERT'i bilinçli olarak bozuyoruz.
-    buildingDao.failInsert = true;
+    repository.failAdd = true;
 
     await cubit.addBuilding(
       name: 'Failed Building',
@@ -88,21 +114,19 @@ void main() {
       constructionYear: 2025,
     );
 
-    // Hata sonrası state hâlâ Loaded olmalı.
     expect(cubit.state, isA<BuildingLoaded>());
 
     final state = cubit.state as BuildingLoaded;
 
-    // Mevcut data kaybolmamalı.
     expect(state.buildings, hasLength(1));
+
     expect(state.buildings.single.id, initialLoaded.buildings.single.id);
 
-    // Hata ayrı olarak taşınmalı.
     expect(state.operationError, contains('Bina eklenirken hata oluştu'));
   });
 
   test('initial stream failure emits BuildingError', () async {
-    buildingDao.failWatch = true;
+    repository.failWatch = true;
 
     final errorFuture = cubit.stream.firstWhere(
       (state) => state is BuildingError,
@@ -114,15 +138,10 @@ void main() {
 
     expect(state.message, contains('Binalar yüklenirken hata oluştu'));
   });
+
   test(
     'clearOperationError removes error without losing loaded buildings',
     () async {
-      await database.buildingDao.insertBuilding(
-        name: 'Existing Building',
-        countryCode: 'TR',
-        constructionYear: 2020,
-      );
-
       final loadedFuture = cubit.stream.firstWhere(
         (state) => state is BuildingLoaded,
       );
@@ -133,8 +152,7 @@ void main() {
 
       expect(initialLoaded.buildings, hasLength(1));
 
-      // Kontrollü şekilde INSERT hatası oluşturuyoruz.
-      buildingDao.failInsert = true;
+      repository.failAdd = true;
 
       await cubit.addBuilding(
         name: 'Failed Building',
@@ -147,18 +165,15 @@ void main() {
       expect(stateWithError.operationError, isNotNull);
       expect(stateWithError.buildings, hasLength(1));
 
-      // UI SnackBar'ı gösterdikten sonra yaptığı işlemi simüle ediyoruz.
       cubit.clearOperationError();
 
       expect(cubit.state, isA<BuildingLoaded>());
 
       final clearedState = cubit.state as BuildingLoaded;
 
-      // Hata temizlenmiş olmalı.
       expect(clearedState.operationError, isNull);
-
-      // Ama mevcut veri kesinlikle kaybolmamalı.
       expect(clearedState.buildings, hasLength(1));
+
       expect(
         clearedState.buildings.single.id,
         initialLoaded.buildings.single.id,

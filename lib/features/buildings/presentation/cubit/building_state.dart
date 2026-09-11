@@ -1,4 +1,4 @@
-import '../../data/buildings_table.drift.dart';
+import '../../domain/models/building.dart';
 
 /// Building özelliğinde UI'ın bulunabileceği bütün durumların
 /// temel sınıfıdır.
@@ -18,7 +18,7 @@ final class BuildingLoading extends BuildingState {
 
 /// Binalar başarıyla geldiğinde kullanılır.
 final class BuildingLoaded extends BuildingState {
-  final List<BuildingsTableData> buildings;
+  final List<Building> buildings;
 
   /// Şu anda filtre uygulanıp uygulanmadığını UI'ın bilmesi için tutulur.
   final bool isFiltered;
@@ -40,7 +40,7 @@ final class BuildingLoaded extends BuildingState {
     this.builtBefore,
   });
   BuildingLoaded copyWith({
-    List<BuildingsTableData>? buildings,
+    List<Building>? buildings,
     bool? isFiltered,
     String? countryCode,
     int? builtBefore,
