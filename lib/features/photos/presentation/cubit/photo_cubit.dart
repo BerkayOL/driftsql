@@ -184,10 +184,7 @@ class PhotoCubit extends Cubit<PhotoState> {
 
       // ÖNEMLİ:
       // Önce gerçek silme işlemi yapılır.
-      await _photoPersistenceService.deletePhoto(
-        photoId: photo.id,
-        imagePath: photo.imagePath,
-      );
+      await _photoPersistenceService.deletePhoto(photo.id);
 
       // Silme tamamlandıktan sonra pagination başlangıcı yenilenir.
       try {

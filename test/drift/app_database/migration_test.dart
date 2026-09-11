@@ -6,8 +6,8 @@ import 'package:driftsql/core/database/app_database.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'generated/schema.dart';
 
-import 'generated/schema_v5.dart' as v5;
 import 'generated/schema_v6.dart' as v6;
+import 'generated/schema_v7.dart' as v7;
 
 void main() {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
@@ -36,60 +36,261 @@ void main() {
     }
   });
 
-  // The following template shows how to write tests ensuring your migrations
-  // preserve existing data.
-  // Testing this can be useful for migrations that change existing columns
-  // (e.g. by alterating their type or constraints). Migrations that only add
-  // tables or columns typically don't need these advanced tests. For more
-  // information, see https://drift.simonbinder.eu/migrations/tests/#verifying-data-integrity
-  // TODO: This generated template shows how these tests could be written. Adopt
-  // it to your own needs when testing migrations with data integrity.
-  test('migration from v5 to v6 does not corrupt data', () async {
-    // Add data to insert into the old database, and the expected rows after the
-    // migration.
-    // TODO: Fill these lists
-    final oldBuildingsTableData = <v5.BuildingsTableData>[];
-    final expectedNewBuildingsTableData = <v6.BuildingsTableData>[];
-
-    final oldFloorsTableData = <v5.FloorsTableData>[];
-    final expectedNewFloorsTableData = <v6.FloorsTableData>[];
-
-    final oldRoomsTableData = <v5.RoomsTableData>[];
-    final expectedNewRoomsTableData = <v6.RoomsTableData>[];
-
-    final oldOfflinePhotosTableData = <v5.OfflinePhotosTableData>[];
-    final expectedNewOfflinePhotosTableData = <v6.OfflinePhotosTableData>[];
+  test('valid populated v6 data survives migration to v7', () async {
+    const oldBuildings = [
+      v6.BuildingsTableData(
+        id: 1,
+        name: 'Headquarters',
+        countryCode: 'TR',
+        constructionYear: 2018,
+        createdAt: 1700000000,
+      ),
+    ];
+    const oldFloors = [
+      v6.FloorsTableData(
+        id: 10,
+        buildingId: 1,
+        name: 'Ground Floor',
+        floorNumber: 0,
+        createdAt: 1700000010,
+      ),
+      v6.FloorsTableData(
+        id: 11,
+        buildingId: 1,
+        name: 'First Floor',
+        floorNumber: 1,
+        createdAt: 1700000020,
+      ),
+    ];
+    const oldRooms = [
+      v6.RoomsTableData(
+        id: 100,
+        floorId: 10,
+        name: 'Plant Room',
+        isHeated: 0,
+        area: 18.5,
+        createdAt: 1700000030,
+      ),
+      v6.RoomsTableData(
+        id: 101,
+        floorId: 11,
+        name: 'Office',
+        isHeated: 1,
+        targetTemperature: 21.5,
+        area: 42,
+        createdAt: 1700000040,
+      ),
+    ];
+    const oldPhotos = [
+      v6.OfflinePhotosTableData(
+        id: 1000,
+        imagePath: '/owned/photos/plant-room.jpg',
+        roomId: 100,
+        createdAt: 1700000050,
+      ),
+    ];
 
     await verifier.testWithDataIntegrity(
-      oldVersion: 5,
-      newVersion: 6,
-      createOld: v5.DatabaseAtV5.new,
-      createNew: v6.DatabaseAtV6.new,
+      oldVersion: 6,
+      newVersion: 7,
+      createOld: v6.DatabaseAtV6.new,
+      createNew: v7.DatabaseAtV7.new,
       openTestedDatabase: AppDatabase.new,
       createItems: (batch, oldDb) {
-        batch.insertAll(oldDb.buildingsTable, oldBuildingsTableData);
-        batch.insertAll(oldDb.floorsTable, oldFloorsTableData);
-        batch.insertAll(oldDb.roomsTable, oldRoomsTableData);
-        batch.insertAll(oldDb.offlinePhotosTable, oldOfflinePhotosTableData);
+        batch.insertAll(oldDb.buildingsTable, oldBuildings);
+        batch.insertAll(oldDb.floorsTable, oldFloors);
+        batch.insertAll(oldDb.roomsTable, oldRooms);
+        batch.insertAll(oldDb.offlinePhotosTable, oldPhotos);
       },
       validateItems: (newDb) async {
         expect(
-          expectedNewBuildingsTableData,
+          oldBuildings
+              .map(
+                (row) => v7.BuildingsTableData(
+                  id: row.id,
+                  name: row.name,
+                  countryCode: row.countryCode,
+                  constructionYear: row.constructionYear,
+                  createdAt: row.createdAt,
+                ),
+              )
+              .toList(),
           await newDb.select(newDb.buildingsTable).get(),
         );
         expect(
-          expectedNewFloorsTableData,
+          oldFloors
+              .map(
+                (row) => v7.FloorsTableData(
+                  id: row.id,
+                  buildingId: row.buildingId,
+                  name: row.name,
+                  floorNumber: row.floorNumber,
+                  createdAt: row.createdAt,
+                ),
+              )
+              .toList(),
           await newDb.select(newDb.floorsTable).get(),
         );
         expect(
-          expectedNewRoomsTableData,
+          oldRooms
+              .map(
+                (row) => v7.RoomsTableData(
+                  id: row.id,
+                  floorId: row.floorId,
+                  name: row.name,
+                  isHeated: row.isHeated,
+                  targetTemperature: row.targetTemperature,
+                  area: row.area,
+                  createdAt: row.createdAt,
+                ),
+              )
+              .toList(),
           await newDb.select(newDb.roomsTable).get(),
         );
         expect(
-          expectedNewOfflinePhotosTableData,
+          oldPhotos
+              .map(
+                (row) => v7.OfflinePhotosTableData(
+                  id: row.id,
+                  imagePath: row.imagePath,
+                  roomId: row.roomId,
+                  createdAt: row.createdAt,
+                ),
+              )
+              .toList(),
           await newDb.select(newDb.offlinePhotosTable).get(),
+        );
+
+        final foreignKeyViolations = await newDb
+            .customSelect('PRAGMA foreign_key_check')
+            .get();
+        expect(foreignKeyViolations, isEmpty);
+
+        await expectLater(
+          newDb.customInsert('''
+            INSERT INTO floors_table (
+              building_id,
+              name,
+              floor_number,
+              created_at
+            ) VALUES (1, 'Duplicate Ground Floor', 0, 1700000060)
+          '''),
+          throwsA(anything),
+        );
+        await expectLater(
+          newDb.customInsert('''
+            INSERT INTO rooms_table (
+              floor_id,
+              name,
+              area,
+              created_at
+            ) VALUES (10, 'Invalid Room', 0, 1700000070)
+          '''),
+          throwsA(anything),
         );
       },
     );
   });
+
+  test('v6 duplicate floor numbers make v6 to v7 migration fail', () async {
+    await expectLater(
+      verifier.testWithDataIntegrity(
+        oldVersion: 6,
+        newVersion: 7,
+        createOld: v6.DatabaseAtV6.new,
+        createNew: v7.DatabaseAtV7.new,
+        openTestedDatabase: AppDatabase.new,
+        createItems: (batch, oldDb) {
+          batch.insert(
+            oldDb.buildingsTable,
+            const v6.BuildingsTableData(
+              id: 1,
+              name: 'Legacy Building',
+              countryCode: 'TR',
+              constructionYear: 2000,
+              createdAt: 1700000000,
+            ),
+          );
+          batch.insertAll(oldDb.floorsTable, const [
+            v6.FloorsTableData(
+              id: 10,
+              buildingId: 1,
+              name: 'First Floor A',
+              floorNumber: 1,
+              createdAt: 1700000010,
+            ),
+            v6.FloorsTableData(
+              id: 11,
+              buildingId: 1,
+              name: 'First Floor B',
+              floorNumber: 1,
+              createdAt: 1700000020,
+            ),
+          ]);
+        },
+        validateItems: (_) async {},
+      ),
+      throwsA(
+        predicate<Object>(
+          (error) => error.toString().contains('UNIQUE constraint failed'),
+          'a UNIQUE constraint migration failure',
+        ),
+      ),
+    );
+  });
+
+  for (final invalidArea in [0.0, -12.5]) {
+    test('v6 room area $invalidArea makes v6 to v7 migration fail', () async {
+      await expectLater(
+        verifier.testWithDataIntegrity(
+          oldVersion: 6,
+          newVersion: 7,
+          createOld: v6.DatabaseAtV6.new,
+          createNew: v7.DatabaseAtV7.new,
+          openTestedDatabase: AppDatabase.new,
+          createItems: (batch, oldDb) {
+            batch.insert(
+              oldDb.buildingsTable,
+              const v6.BuildingsTableData(
+                id: 1,
+                name: 'Legacy Building',
+                countryCode: 'TR',
+                constructionYear: 2000,
+                createdAt: 1700000000,
+              ),
+            );
+            batch.insert(
+              oldDb.floorsTable,
+              const v6.FloorsTableData(
+                id: 10,
+                buildingId: 1,
+                name: 'Ground Floor',
+                floorNumber: 0,
+                createdAt: 1700000010,
+              ),
+            );
+            batch.insert(
+              oldDb.roomsTable,
+              v6.RoomsTableData(
+                id: 100,
+                floorId: 10,
+                name: 'Invalid Legacy Room',
+                isHeated: 1,
+                targetTemperature: 20,
+                area: invalidArea,
+                createdAt: 1700000020,
+              ),
+            );
+          },
+          validateItems: (_) async {},
+        ),
+        throwsA(
+          predicate<Object>(
+            (error) => error.toString().contains('CHECK constraint failed'),
+            'a CHECK constraint migration failure',
+          ),
+        ),
+      );
+    });
+  }
 }

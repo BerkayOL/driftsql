@@ -16,7 +16,7 @@ Bu proje, saha operasyonlarında internet bağlantısı olmadan yüksek boyutlu 
 
 ## Kullanılan Temel Paketler
 
-* `drift` & `sqlite3_flutter_libs`
+* `drift` & `drift_flutter`
 * `flutter_bloc`
 * `path_provider`
 * `image_picker`

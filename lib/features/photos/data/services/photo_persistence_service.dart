@@ -37,17 +37,12 @@ final class PhotoPersistenceService {
   /// Önce DB kaydını siler, ardından fiziksel dosyayı temizler.
   ///
   /// DB silme başarısız olursa fiziksel dosyaya hiç dokunulmaz.
-  Future<void> deletePhoto({
-    required int photoId,
-    required String imagePath,
-  }) async {
-    // Photo DELETE + cleanup queue INSERT aynı SQLite transaction'da.
-    final deletedRows = await _photoDao.deletePhotoAndQueueCleanup(
-      photoId: photoId,
-      imagePath: imagePath,
-    );
+  Future<void> deletePhoto(int photoId) async {
+    // Photo DELETE + DB'deki gerçek yolun cleanup queue'ya eklenmesi aynı
+    // SQLite transaction'da gerçekleşir.
+    final imagePath = await _photoDao.deletePhotoAndQueueCleanup(photoId);
 
-    if (deletedRows == 0) {
+    if (imagePath == null) {
       throw StateError('Silinecek fotoğraf database kaydında bulunamadı.');
     }
 

@@ -24,18 +24,12 @@ final class TestPhotoDao extends PhotoDao {
   }
 
   @override
-  Future<int> deletePhotoAndQueueCleanup({
-    required int photoId,
-    required String imagePath,
-  }) {
+  Future<String?> deletePhotoAndQueueCleanup(int photoId) {
     if (failDelete) {
-      return Future<int>.error(StateError('Test delete failure'));
+      return Future<String?>.error(StateError('Test delete failure'));
     }
 
-    return super.deletePhotoAndQueueCleanup(
-      photoId: photoId,
-      imagePath: imagePath,
-    );
+    return super.deletePhotoAndQueueCleanup(photoId);
   }
 }
 
@@ -168,7 +162,7 @@ void main() {
     photoDao.failDelete = true;
 
     await expectLater(
-      persistenceService.deletePhoto(photoId: photoId, imagePath: savedPath),
+      persistenceService.deletePhoto(photoId),
       throwsA(anything),
     );
 
@@ -198,10 +192,7 @@ void main() {
       final savedPath = photos.single.imagePath;
       final savedFile = File(savedPath);
 
-      await persistenceService.deletePhoto(
-        photoId: photoId,
-        imagePath: savedPath,
-      );
+      await persistenceService.deletePhoto(photoId);
 
       expect(await savedFile.exists(), isFalse);
       expect(await photoDao.getAllPhotos(), isEmpty);
@@ -224,10 +215,7 @@ void main() {
 
     failFileDelete = true;
 
-    await persistenceService.deletePhoto(
-      photoId: photoId,
-      imagePath: savedPath,
-    );
+    await persistenceService.deletePhoto(photoId);
 
     // Mantıksal DB kaydı silinmiş olmalı.
     expect(await photoDao.getAllPhotos(), isEmpty);
@@ -259,10 +247,7 @@ void main() {
     // İlk fiziksel delete'i bilerek bozuyoruz.
     failFileDelete = true;
 
-    await persistenceService.deletePhoto(
-      photoId: photoId,
-      imagePath: savedPath,
-    );
+    await persistenceService.deletePhoto(photoId);
 
     expect(await savedFile.exists(), isTrue);
     expect(await photoDao.getPendingFileCleanups(), hasLength(1));
@@ -279,6 +264,46 @@ void main() {
     await retryService.retryPendingCleanups();
 
     expect(await savedFile.exists(), isFalse);
+    expect(await photoDao.getPendingFileCleanups(), isEmpty);
+  });
+
+  test('nonexistent photo ID does not touch files or queue cleanup', () async {
+    final unrelatedFile = File(
+      '${tempDirectory.path}${Platform.pathSeparator}unrelated.jpg',
+    );
+    await unrelatedFile.writeAsBytes([1, 2, 3, 4]);
+
+    await expectLater(
+      persistenceService.deletePhoto(999),
+      throwsA(isA<StateError>()),
+    );
+
+    expect(await unrelatedFile.exists(), isTrue);
+    expect(await photoDao.getPendingFileCleanups(), isEmpty);
+  });
+
+  test('delete uses the path stored on the selected database row', () async {
+    final firstFile = File(
+      '${tempDirectory.path}${Platform.pathSeparator}first.jpg',
+    );
+    final secondFile = File(
+      '${tempDirectory.path}${Platform.pathSeparator}second.jpg',
+    );
+    await firstFile.writeAsBytes([1]);
+    await secondFile.writeAsBytes([2]);
+
+    final firstId = await photoDao.insertPhoto(imagePath: firstFile.path);
+    final secondId = await photoDao.insertPhoto(imagePath: secondFile.path);
+
+    await persistenceService.deletePhoto(firstId);
+
+    expect(await firstFile.exists(), isFalse);
+    expect(await secondFile.exists(), isTrue);
+
+    final remainingPhotos = await photoDao.getAllPhotos();
+    expect(remainingPhotos, hasLength(1));
+    expect(remainingPhotos.single.id, secondId);
+    expect(remainingPhotos.single.imagePath, secondFile.path);
     expect(await photoDao.getPendingFileCleanups(), isEmpty);
   });
 }
