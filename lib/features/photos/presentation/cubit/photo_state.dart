@@ -1,4 +1,4 @@
-// PhotoWithLocation sorgu sonuç tipini kullanacağımız için DAO'yu import ediyoruz.
+// Paginated photo view currently carries the DAO's location projection.
 import '../../data/dao/photo_dao.dart';
 
 /// Fotoğraf ekranının gösterebileceği durumların ortak üst tipidir.

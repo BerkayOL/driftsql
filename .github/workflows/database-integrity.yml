@@ -35,3 +35,6 @@ jobs:
 
       - name: Ensure generated files are committed
         run: git diff --exit-code
+
+      - name: Run tests
+        run: flutter test

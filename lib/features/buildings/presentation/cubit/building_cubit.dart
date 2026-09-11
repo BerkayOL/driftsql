@@ -11,7 +11,7 @@ class BuildingCubit extends Cubit<BuildingState> {
   /// BuildingRepository bu sorumluluğu presentation katmanından soyutlar.
   final BuildingRepository _repository;
 
-  /// Drift'in reactive Stream'ini dinlediğimiz subscription.
+  /// Repository'nin reactive stream'ini dinlediğimiz subscription.
   ///
   /// Filtre değiştiğinde eski sorguyu bırakıp
   /// yeni sorguyu dinlememizi sağlar.
@@ -89,9 +89,8 @@ class BuildingCubit extends Cubit<BuildingState> {
 
   /// Yeni bina ekler.
   ///
-  /// INSERT sonrasında listeyi tekrar elle çağırmıyoruz.
-  /// Çünkü DAO'daki .watch() sorgusu database değişikliğini
-  /// otomatik olarak algılar.
+  /// Repository stream'i ekleme sonrasında güncel listeyi yayınladığı
+  /// için Cubit manuel yenileme yapmaz.
   Future<void> addBuilding({
     required String name,
     required String countryCode,
@@ -104,10 +103,7 @@ class BuildingCubit extends Cubit<BuildingState> {
         constructionYear: constructionYear,
       );
 
-      // loadBuildings() yok!
-      //
-      // Drift .watch() INSERT'i fark edip
-      // güncel listeyi otomatik yayınlayacak.
+      // Aktif repository stream'i güncel listeyi yayınlayacak.
     } catch (e) {
       if (!isClosed) {
         _emitOperationError('Bina eklenirken hata oluştu: $e');
@@ -120,8 +116,7 @@ class BuildingCubit extends Cubit<BuildingState> {
     try {
       await _repository.deleteBuildingById(id);
 
-      // Burada da manuel reload yok.
-      // Drift .watch() DELETE işlemini fark edecek.
+      // Aktif repository stream'i güncel listeyi yayınlayacak.
     } catch (e) {
       if (!isClosed) {
         _emitOperationError('Bina silinirken hata oluştu: $e');
