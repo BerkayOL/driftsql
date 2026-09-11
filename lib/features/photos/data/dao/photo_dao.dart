@@ -123,27 +123,35 @@ class PhotoDao extends DatabaseAccessor<AppDatabase> with $PhotoDaoMixin {
     );
   }
 
-  /// Fotoğraf kaydını siler ve fiziksel dosyanın cleanup işini
-  /// aynı SQLite transaction içerisinde oluşturur.
-  Future<int> deletePhotoAndQueueCleanup({
-    required int photoId,
-    required String imagePath,
-  }) {
+  /// Fotoğraf kaydını siler ve DB'de saklanan dosya yolu için cleanup
+  /// işini aynı SQLite transaction içerisinde oluşturur.
+  ///
+  /// Kayıt bulunamazsa null, silinen kaydın gerçek dosya yolunu aksi halde
+  /// döndürür. Böylece caller bağımsız ve hatalı bir yol sağlayamaz.
+  Future<String?> deletePhotoAndQueueCleanup(int photoId) {
     return transaction(() async {
+      final photo = await (select(
+        offlinePhotosTable,
+      )..where((table) => table.id.equals(photoId))).getSingleOrNull();
+
+      if (photo == null) {
+        return null;
+      }
+
       final deletedRows = await (delete(
         offlinePhotosTable,
       )..where((table) => table.id.equals(photoId))).go();
 
       if (deletedRows == 0) {
-        return 0;
+        return null;
       }
 
       await into(pendingFileCleanupTable).insert(
-        PendingFileCleanupTableCompanion.insert(filePath: imagePath),
+        PendingFileCleanupTableCompanion.insert(filePath: photo.imagePath),
         mode: InsertMode.insertOrIgnore,
       );
 
-      return deletedRows;
+      return photo.imagePath;
     });
   }
 
